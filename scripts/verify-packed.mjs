@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { mkdtemp, readFile, writeFile, mkdir, copyFile, rm, realpath, cp, access } from 'node:fs/promises';
+import { mkdtemp, readFile, writeFile, rm, realpath, cp, access } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -25,21 +25,12 @@ if (exportPath) {
 }
 const temporary = await mkdtemp(path.join(tmpdir(), 'still-packed-'));
 try {
-  const output = JSON.parse(run(npm, ['pack', '--workspace', '@effortlessmetrics/still', '--ignore-scripts', '--json', '--pack-destination', temporary], root, true))[0];
   const source = JSON.parse(await readFile(path.join(root, 'source-files.json'), 'utf8'));
   const expected = source.filter(file => file.startsWith('packages/still/')).map(file => file.slice('packages/still/'.length)).sort();
-  assert.deepEqual(output.files.map(file => file.path).sort(), expected, 'Archive must contain only the complete reviewed package');
-  const archive = path.join(temporary, output.filename);
   const consumer = path.join(temporary, 'consumer');
-  for (const file of source.filter(file => file.startsWith('starter/'))) {
-    const target = path.join(consumer, file.slice('starter/'.length));
-    await mkdir(path.dirname(target), { recursive: true });
-    await copyFile(path.join(root, file), target);
-  }
-  const manifestPath = path.join(consumer, 'package.json');
-  const manifest = JSON.parse(await readFile(manifestPath, 'utf8'));
-  manifest.dependencies['@effortlessmetrics/still'] = `file:../${output.filename}`;
-  await writeFile(manifestPath, JSON.stringify(manifest, null, 2) + '\n');
+  run(process.execPath, ['scripts/create-starter.mjs', consumer], root);
+  const delivery = JSON.parse(await readFile(path.join(consumer, 'STARTER-DELIVERY.json'), 'utf8'));
+  const archive = path.join(consumer, delivery.library.slice('file:'.length));
   run(npm, ['install', '--no-audit', '--no-fund'], consumer);
   run(npm, ['ci', '--no-audit', '--no-fund'], consumer);
   const installedPath = path.join(consumer, 'node_modules/@effortlessmetrics/still');
@@ -53,7 +44,7 @@ try {
   if (exportPath) {
     for (const generated of ['node_modules', 'dist', '.astro']) await rm(path.join(consumer, generated), { recursive: true, force: true });
     await cp(temporary, path.resolve(exportPath), { recursive: true, force: false, errorOnExist: true });
-    await writeFile(path.join(path.resolve(exportPath), 'README.md'), '# Still standalone starter candidate\n\nKeep this entire directory together: the sibling package archive is pinned by the consumer manifest and lockfile. With Node 24.19 within major 24, enter consumer and run npm ci, npm run check, npm run build and npm run dev. No registry release of Still 0.2.0 is required. This complete neutral starter defaults to noindex and a disabled contact form; review its configuration and content before any separately authorized deployment.\n');
+    await writeFile(path.join(path.resolve(exportPath), 'README.md'), '# Still standalone starter candidate\n\nThe consumer directory contains its exact vendor archive, manifest and lockfile. Keep them together. With Node 24.19 within major 24, enter consumer and run npm ci, npm run check, npm run build and npm run dev. No registry release of Still 0.2.0 is required. This complete neutral starter defaults to noindex and a disabled contact form; review its configuration and content before any separately authorized deployment.\n');
     const exportedConsumer = path.join(path.resolve(exportPath), 'consumer');
     run(npm, ['ci', '--no-audit', '--no-fund'], exportedConsumer);
     run(npm, ['run', 'check'], exportedConsumer);

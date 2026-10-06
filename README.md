@@ -11,3 +11,9 @@ This repository starts with a new root commit. Its source allowlist is reviewed 
 The 0.2.0 candidate supersedes the limited 0.1.0 API as a preparation artifact; no npm release is performed by these commands or by CI. Existing published 0.1.0 remains immutable. See [the candidate changes](docs/candidate-0.2.0.md).
 
 Run `npm run verify:packed` to qualify the complete starter against an isolated installed archive rather than a workspace link. See [release preparation](docs/release.md) for the nonpublishing candidate procedure.
+
+## Start a small independent site
+
+With Node 24.19 within major 24, clone this producer, then run `node scripts/create-starter.mjs ../my-still-site`. This command needs Node/npm, but no producer dependency installation. It creates only the complete neutral site, its own lockfile, licensed fonts, and one reviewed library archive under `vendor/`. It refuses an existing destination. Enter the new directory and run `npm ci`, `npm run check`, `npm run build`, then `npm run dev`. Keep the archive and lockfile together; the expanded 0.2.0 library is not yet on npm.
+
+Replace neutral content, site origin, assets and identity in that consumer before separately authorized deployment. The library and starter remain in this producer; private sites consume the library directly as siblings. The GitHub repository is not marked as a template: using GitHub's whole-repository copy would include the producer's development tree. This exporter is the supported small-starter delivery. A separate GitHub template repository would be a distinct repository/maintenance decision, not a prerequisite for this delivery.

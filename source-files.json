@@ -30,6 +30,7 @@
   "playwright.config.ts",
   "README.md",
   "scripts/audit-boundary.mjs",
+  "scripts/create-starter.mjs",
   "scripts/verify-packed.mjs",
   "source-files.json",
   "starter/astro.config.mjs",
