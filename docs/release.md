@@ -1,5 +1,7 @@
 # Release preparation
 
+For a small new consumer without installing producer tooling, run `node scripts/create-starter.mjs ../new-site`. It creates a standalone directory with its own vendor archive and frozen npm lockfile. `verify:packed` now qualifies this same exporter in CI, including the relocated delivery. Existing historical ZIPs keep their original sibling-archive structure and hashes.
+
 Version 0.2.0 is a candidate. These steps prepare and validate bytes; they do not publish them.
 
 1. Use the supported Node version and run `npm ci`, `npm run check`, `npm test`, `npm run build` and `npm run test:browser`.

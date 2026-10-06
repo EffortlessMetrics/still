@@ -12,7 +12,8 @@
     "test": "node --test tests/contracts.test.mjs",
     "test:browser": "playwright test",
     "pack:still": "npm pack --workspace @effortlessmetrics/still --ignore-scripts",
-    "verify:packed": "node scripts/verify-packed.mjs"
+    "verify:packed": "node scripts/verify-packed.mjs",
+    "starter:export": "node scripts/create-starter.mjs"
   },
   "devDependencies": {
     "@playwright/test": "1.63.0"
