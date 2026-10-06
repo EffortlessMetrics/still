@@ -5,3 +5,5 @@ Still puts reading before decoration. It uses large body text, bounded measures,
 The package owns reusable document, navigation and page composition plus design tokens and responsive styles. A consumer owns identity, content, routes, metadata, prices, assets, fonts and any contact/offline integrations. The starter is a complete independent example of the same API. Its neutral copy is demonstration content, not a commercial offer or a working form.
 
 Fonts in the starter are optional self-hosted IBM Plex examples under their own OFL notices. The package has no font or icon assets. Theme controls can use neutral text or a consumer-provided slot. Do not copy another consumer's private assets or configuration into this repository.
+
+Page and ServicePage main elements use `tabindex=-1` so skip navigation transfers keyboard focus into content without adding an extra tab stop. Keyboard qualification checks focus at the destination and continues to the first content action.

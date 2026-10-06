@@ -39,3 +39,47 @@ test('service prices align on desktop and stack on mobile without a live form', 
   await expect(page.getByRole('button', { name: 'Sending unavailable' })).toBeDisabled();
   expect(await page.locator('form').getAttribute('action')).toBeNull();
 });
+
+test('keyboard navigation and preview metadata work through the public composition', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/');
+  await page.keyboard.press('Tab');
+  await expect(page.getByRole('link', { name: 'Skip to content' })).toBeFocused();
+  await page.keyboard.press('Enter');
+  expect(new URL(page.url()).hash).toBe('#main');
+  await expect(page.locator('main')).toBeFocused();
+  await page.keyboard.press('Tab');
+  await expect(page.getByRole('link', { name: 'Explore workshops' })).toBeFocused();
+  expect(await page.locator('html').evaluate(el => getComputedStyle(el).scrollBehavior)).toBe('auto');
+  await page.keyboard.press('Enter');
+  await expect(page).toHaveURL(/\/workshops\/$/);
+  await expect(page.locator('h1')).toBeVisible();
+  await expect(page.locator('link[rel=canonical]')).toHaveAttribute('href', 'https://clear-current.example/workshops/');
+  const robots = await page.request.get('/robots.txt');
+  expect(await robots.text()).toContain('Disallow: /');
+  const sitemap = await page.request.get('/sitemap.xml');
+  expect(await sitemap.text()).toContain('https://clear-current.example/project-support/');
+});
+
+test('theme remains usable when persistence is unavailable and makes no external requests', async ({ page }) => {
+  const errors: string[] = [];
+  const external: string[] = [];
+  page.on('pageerror', error => errors.push(error.message));
+  page.on('request', request => {
+    if (new URL(request.url()).origin !== 'http://127.0.0.1:4390') external.push(request.url());
+  });
+  await page.addInitScript(() => Object.defineProperty(window, 'localStorage', { get() { throw new Error('Storage unavailable'); } }));
+  await page.emulateMedia({ colorScheme: 'light' });
+  await page.goto('/');
+  const button = page.getByRole('button', { name: 'Switch light or dark theme' });
+  await button.click();
+  await expect(button).toHaveAttribute('aria-pressed', 'true');
+  await page.reload();
+  await expect(button).toHaveAttribute('aria-pressed', 'false');
+  await page.emulateMedia({ colorScheme: 'dark' });
+  await expect(button).toHaveAttribute('aria-pressed', 'true');
+  await button.click();
+  await expect(button).toHaveAttribute('aria-pressed', 'false');
+  expect(errors).toEqual([]);
+  expect(external).toEqual([]);
+});
