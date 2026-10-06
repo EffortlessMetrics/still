@@ -9,3 +9,5 @@ Use Node 24.19 within major 24, then `npm ci`, `npm run check`, `npm test`, `npm
 This repository starts with a new root commit. Its source allowlist is reviewed before publication; it contains no imported Git history. Code is MIT OR Apache-2.0. Starter font files retain separate SIL OFL notices and provenance. The runtime package contains no fonts or private assets.
 
 The 0.2.0 candidate supersedes the limited 0.1.0 API as a preparation artifact; no npm release is performed by these commands or by CI. Existing published 0.1.0 remains immutable. See [the candidate changes](docs/candidate-0.2.0.md).
+
+Run `npm run verify:packed` to qualify the complete starter against an isolated installed archive rather than a workspace link. See [release preparation](docs/release.md) for the nonpublishing candidate procedure.
