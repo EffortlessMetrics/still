@@ -161,7 +161,7 @@ nav button {
 }
 .cta {
   display: inline-flex;
-  gap: 25px;
+  gap: 12px;
   align-items: center;
   background: var(--accent);
   color: #fff;
@@ -396,7 +396,7 @@ h1, h2, h3 { overflow-wrap: anywhere; }
 .package-column { display: grid; grid-template-rows: subgrid; grid-row: span 3; min-width: 0; }
 .package-column h2 { margin: 0; font-size: 1.75rem; line-height: 1.25; letter-spacing: -0.03em; }
 .package-column p { margin: 0; }
-.package-price { font-size: clamp(1.5rem, 2.2vw, 1.75rem); color: var(--accent); }
+.package-column .package-price { font-size: clamp(1.5rem, 2.2vw, 1.75rem); color: var(--accent); }
 .package-details { max-width: 70ch; }
 @media (max-width: 760px) {
   .package-columns { display: block; margin-top: 24px; }
