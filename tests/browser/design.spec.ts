@@ -47,8 +47,11 @@ test('keyboard navigation and preview metadata work through the public compositi
   await expect(page.getByRole('link', { name: 'Skip to content' })).toBeFocused();
   await page.keyboard.press('Enter');
   expect(new URL(page.url()).hash).toBe('#main');
+  await expect(page.locator('main')).toBeFocused();
+  await page.keyboard.press('Tab');
+  await expect(page.getByRole('link', { name: 'Explore workshops' })).toBeFocused();
   expect(await page.locator('html').evaluate(el => getComputedStyle(el).scrollBehavior)).toBe('auto');
-  await page.getByRole('navigation', { name: 'Main' }).getByRole('link', { name: 'Workshops', exact: true }).click();
+  await page.keyboard.press('Enter');
   await expect(page).toHaveURL(/\/workshops\/$/);
   await expect(page.locator('h1')).toBeVisible();
   await expect(page.locator('link[rel=canonical]')).toHaveAttribute('href', 'https://clear-current.example/workshops/');
