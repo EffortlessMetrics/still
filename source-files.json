@@ -32,6 +32,7 @@
   "scripts/audit-boundary.mjs",
   "scripts/create-starter.mjs",
   "scripts/verify-packed.mjs",
+  "scripts/verify-starter-paths.mjs",
   "source-files.json",
   "starter/astro.config.mjs",
   "starter/LICENSE",

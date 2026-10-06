@@ -15,6 +15,7 @@ function run(command, args, cwd, capture = false, env = process.env) {
   return result.stdout;
 }
 run(process.execPath, ['scripts/audit-boundary.mjs'], root);
+run(process.execPath, ['scripts/verify-starter-paths.mjs'], root);
 const exportIndex = process.argv.indexOf('--export');
 const exportPath = exportIndex < 0 ? undefined : process.argv[exportIndex + 1];
 assert(exportIndex < 0 || exportPath, '--export requires a new destination directory');
