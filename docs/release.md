@@ -9,3 +9,5 @@ Version 0.2.0 is a candidate. These steps prepare and validate bytes; they do no
 5. Requalify each consumer against the exact retained archive. Preserve visual parity and consumer-owned contact, privacy and offline policy.
 
 Publishing requires a separate explicit release authorization. CI has read-only permissions and no publication, credential or deployment step. Existing 0.1.0 remains unchanged. A future reviewed release should publish from this clean producer source, then verify registry bytes against the retained archive and smoke-test a registry installation.
+
+To deliver the complete neutral starter before publication, use `npm run verify:packed -- --export <new-directory>`. The output retains the exact archive plus a standalone consumer with relative archive pin and lockfile, after all qualification steps pass. Generated dependencies and build output are omitted. Never distribute only the workspace starter directory or omit its sibling archive.
