@@ -28,10 +28,16 @@ test('theme supports persistence, keyboard and system preference', async ({ page
 test('service prices align on desktop and stack on mobile without a live form', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 }); await page.goto('/workshops/');
   const positions = await page.locator('.package-price').evaluateAll(elements => elements.map(el => el.getBoundingClientRect().top));
-  expect(positions).toHaveLength(3); expect(Math.max(...positions) - Math.min(...positions)).toBeLessThan(1);
+  expect(positions).toHaveLength(3);
+  for (const card of await page.locator('.package-column').all()) {
+    await expect(card).toHaveClass(/offer/);
+    expect(await card.evaluate(el => getComputedStyle(el).borderTopWidth)).toBe('2px');
+    expect(await card.locator('.package-price').evaluate(el => getComputedStyle(el).fontSize)).toBe('28px');
+  } expect(Math.max(...positions) - Math.min(...positions)).toBeLessThan(1);
   await page.setViewportSize({ width: 390, height: 844 });
   const mobile = await page.locator('.package-price').evaluateAll(elements => elements.map(el => el.getBoundingClientRect().top));
   expect(mobile[1]).toBeGreaterThan(mobile[0]);
+  expect(await page.locator('.package-price').first().evaluate(el => getComputedStyle(el).fontSize)).toBe('24px');
   await page.goto('/contact/');
   await expect(page.locator('fieldset')).toHaveAttribute('disabled', '');
   await expect(page.locator('input[name=name]')).toBeDisabled();
@@ -82,4 +88,23 @@ test('theme remains usable when persistence is unavailable and makes no external
   await expect(button).toHaveAttribute('aria-pressed', 'false');
   expect(errors).toEqual([]);
   expect(external).toEqual([]);
+});
+
+test('actions retain comfortable padding with tighter label and arrow spacing', async ({ page }) => {
+  for (const width of [1440, 390, 320]) {
+    await page.setViewportSize({ width, height: 900 });
+    await page.goto('/');
+    for (const action of await page.locator('.cta').all()) {
+      const metrics = await action.evaluate(el => {
+        const style = getComputedStyle(el);
+        const box = el.getBoundingClientRect();
+        return { gap: style.columnGap, horizontalPadding: style.paddingLeft, height: box.height, left: box.left, right: box.right };
+      });
+      expect(metrics.gap).toBe('12px');
+      expect(metrics.horizontalPadding).toBe('22px');
+      expect(metrics.height).toBeGreaterThanOrEqual(48);
+      expect(metrics.left).toBeGreaterThanOrEqual(0);
+      expect(metrics.right).toBeLessThanOrEqual(width);
+    }
+  }
 });
