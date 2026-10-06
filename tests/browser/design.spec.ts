@@ -30,8 +30,6 @@ test('service prices align on desktop and stack on mobile without a live form', 
   const positions = await page.locator('.package-price').evaluateAll(elements => elements.map(el => el.getBoundingClientRect().top));
   expect(positions).toHaveLength(3);
   for (const card of await page.locator('.package-column').all()) {
-    await expect(card).toHaveClass(/offer/);
-    expect(await card.evaluate(el => getComputedStyle(el).borderTopWidth)).toBe('2px');
     expect(await card.locator('.package-price').evaluate(el => getComputedStyle(el).fontSize)).toBe('28px');
   } expect(Math.max(...positions) - Math.min(...positions)).toBeLessThan(1);
   await page.setViewportSize({ width: 390, height: 844 });
@@ -106,5 +104,33 @@ test('actions retain comfortable padding with tighter label and arrow spacing', 
       expect(metrics.left).toBeGreaterThanOrEqual(0);
       expect(metrics.right).toBeLessThanOrEqual(width);
     }
+  }
+});
+
+test('editorial dividers stay extremely faint and responsive with or without JavaScript', async ({ browser }) => {
+  for (const javascript of [true, false]) for (const scheme of ['light', 'dark'] as const) for (const width of [1440, 390, 320]) {
+    const context = await browser.newContext({ javaScriptEnabled: javascript, colorScheme: scheme, viewport: { width, height: 900 } });
+    const page = await context.newPage();
+    for (const route of ['/workshops/', '/project-support/']) {
+      await page.goto('http://127.0.0.1:4390' + route);
+      await page.evaluate(() => document.fonts.ready);
+      await expect(page.locator('.package-columns')).toHaveClass(/service-dividers/);
+      expect(await page.locator('.package-column.offer').count()).toBe(0);
+      const divider = await page.locator('.package-column').nth(1).evaluate(el => {
+        const style = getComputedStyle(el, '::before');
+        return { opacity: style.opacity, mask: style.maskImage, dots: style.backgroundImage, repeat: style.backgroundRepeat, width: style.width, height: style.height, filter: style.filter, animation: style.animationName, pointerEvents: style.pointerEvents };
+      });
+      expect(divider.opacity).toBe('0.1');
+      expect(divider.mask).toContain('linear-gradient');
+      expect(divider.mask).toContain('50%');
+      expect(divider.dots).toContain('radial-gradient');
+      expect(divider.filter).toBe('none');
+      expect(divider.animation).toBe('none');
+      expect(divider.pointerEvents).toBe('none');
+      expect(divider.repeat).toBe(width > 760 ? 'repeat-y' : 'repeat-x');
+      expect(width > 760 ? divider.width : divider.height).toBe('2px');
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    }
+    await context.close();
   }
 });
