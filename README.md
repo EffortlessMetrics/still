@@ -1,10 +1,10 @@
 # Still service-site starter
 
-A neutral, standalone default with verified offline caching and connection-aware native intent prefetch enabled. Shared components keep their established npm names/imports; canonical static precache setup uses the unpublished astromache 0.2.4 core preset. Cache integrity and lifecycle remain owned by offline 0.1.4.
+A neutral, standalone default with verified offline caching and connection-aware native intent prefetch enabled. Shared components keep their established npm names/imports; canonical static precache setup uses the unpublished astromache 0.2.6 core preset. Cache integrity and lifecycle remain owned by offline 0.1.4.
 
 Use Node 24.19.x. Run npm ci --ignore-scripts, npm run check, npm run build and npm run dev. Exact active archive hashes are in STARTER-DELIVERY.json. These expanded candidates are not yet registry releases.
 
-Replace neutral content/branding and edit site.config.mjs. Keep API and host redirect URLs out of the precache using excludedPages and excludedPrefixes. Query policy is explicitly stripQuery:false. Registration uses /reading-worker.js at root scope; coordinate any worker filename/scope edit with the small layout registration call. Natural activation waits for existing clients; no forced reload or activation occurs.
+Replace neutral content/branding and edit site.config.mjs. Keep API and host redirect URLs out of the precache using excludedPages and excludedPrefixes. Query policy is explicitly stripQuery:false. Registration follows site.offline.workerFile at root scope; edit that setting to rename the generated and registered worker together, and update the worker path in public/_headers to preserve its no-cache policy. Scope remains configured in the small layout registration call. Natural activation waits for existing clients; no forced reload or activation occurs.
 
 Static HTML must remain byte-identical to selected build output. _headers supplies no-transform on compatible static hosts; host Functions and other serving products require equivalent policy. Hosted exact-byte and fresh install/offline/reconnect checks remain NOT RUN. Local browser acceptance is not deployment approval.
 

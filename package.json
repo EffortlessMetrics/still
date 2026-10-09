@@ -14,7 +14,7 @@
   "dependencies": {
     "@effortlessmetrics/still": "file:vendor/effortlessmetrics-still-0.2.1.tgz",
     "astro": "7.3.5",
-    "astromache": "file:vendor/astromache-0.2.4.tgz",
+    "astromache": "file:vendor/astromache-0.2.6.tgz",
     "@effortlessmetrics/astro-offline": "file:vendor/effortlessmetrics-astro-offline-0.1.4.tgz"
   },
   "devDependencies": {
