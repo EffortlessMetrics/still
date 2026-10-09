@@ -6,20 +6,23 @@
       "sha256": "3dde922a9f0b0e7ad1f41f8c60b187901cbdbc3601b13813dad56b508c5dfd84"
     },
     "astromache": {
-      "file": "vendor/astromache-0.2.2.tgz",
-      "sha256": "8405030ede7a4c71be9d2b021c8ab91b1125d2039f6fad53d5b352d1b4d8da28"
+      "file": "vendor/astromache-0.2.4.tgz",
+      "sha256": "04fa893ceb51ead25ceb0a98479b5a50f0af85116ce37e750eb628823634bed6"
     },
     "@effortlessmetrics/astro-offline": {
       "file": "vendor/effortlessmetrics-astro-offline-0.1.4.tgz",
       "sha256": "55d880bfa3fc9dcd650df94a1354040db899130edfb471d8caf45b6fa96e257e"
     }
   },
+  "sourceCommits": {
+    "astromache-core": "5b50c734439f4b5b2dc46c86b6eac76b1d0c4ef8",
+    "still-core": "6efc7b895442f328fa38a4aacd5a5c9e7eee5c2a"
+  },
   "offline": true,
   "intentPrefetch": true,
-  "hostedAcceptance": "NOT RUN",
-  "sourceCommits": {
-    "astromache-core": "de3da5d856522de278b0501af7d966cb028cd916",
-    "still-core": "a2dcc7df601e41cd9a9be48e4370d267b22db9b1"
-  },
-  "localBrowserAcceptance": "PASS exact relocated archive: navigation/prefetch/offline/reconnect/integrity/cache-byte checks"
+  "applicationLicense": "UNLICENSED",
+  "templateCodeLicense": "MIT OR Apache-2.0",
+  "upstreamNotices": "licenses/template; replacement content remains owner-controlled",
+  "localBrowserAcceptance": "PASS final exact archive: navigation/prefetch/offline/reconnect/integrity/cache-byte checks",
+  "hostedAcceptance": "NOT RUN"
 }

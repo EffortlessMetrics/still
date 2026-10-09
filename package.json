@@ -3,17 +3,18 @@
   "version": "0.2.0",
   "private": true,
   "type": "module",
-  "license": "MIT OR Apache-2.0",
+  "license": "UNLICENSED",
   "scripts": {
     "dev": "astro dev",
     "check": "astro check",
     "build": "astro build",
-    "preview": "astro preview"
+    "preview": "astro preview",
+    "verify:licenses": "node scripts/verify-licenses.mjs"
   },
   "dependencies": {
     "@effortlessmetrics/still": "file:vendor/effortlessmetrics-still-0.2.1.tgz",
     "astro": "7.3.5",
-    "astromache": "file:vendor/astromache-0.2.2.tgz",
+    "astromache": "file:vendor/astromache-0.2.4.tgz",
     "@effortlessmetrics/astro-offline": "file:vendor/effortlessmetrics-astro-offline-0.1.4.tgz"
   },
   "devDependencies": {
