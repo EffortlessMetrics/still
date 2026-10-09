@@ -1,0 +1,8 @@
+{
+  "scope": "Neutral public starter only; existing branded Git history retained",
+  "frozenSourceMapSha256": "18c230ffc6a9d8c8bb40d5c5cf274331aa5b0c96c6262778f6134dbfb1ba30f0",
+  "privateSourceImported": false,
+  "deniedStillPR4Included": false,
+  "localBrowserQualification": "PASS exact relocated archive; final assembled browser acceptance",
+  "hostedAcceptance": "NOT RUN"
+}

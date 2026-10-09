@@ -1,22 +1,25 @@
 {
-  "name": "still-workspace",
+  "name": "still-neutral-starter",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
-  "workspaces": [
-    "packages/still",
-    "starter"
-  ],
+  "license": "MIT OR Apache-2.0",
   "scripts": {
-    "build": "npm run build --workspace starter",
-    "check": "npm run check --workspace starter && node scripts/audit-boundary.mjs",
-    "test": "node --test tests/contracts.test.mjs",
-    "test:browser": "playwright test",
-    "pack:still": "npm pack --workspace @effortlessmetrics/still --ignore-scripts",
-    "verify:packed": "node scripts/verify-packed.mjs",
-    "starter:export": "node scripts/create-starter.mjs"
+    "dev": "astro dev",
+    "check": "astro check",
+    "build": "astro build",
+    "preview": "astro preview"
+  },
+  "dependencies": {
+    "@effortlessmetrics/still": "file:vendor/effortlessmetrics-still-0.2.1.tgz",
+    "astro": "7.3.5",
+    "astromache": "file:vendor/astromache-0.2.2.tgz",
+    "@effortlessmetrics/astro-offline": "file:vendor/effortlessmetrics-astro-offline-0.1.4.tgz"
   },
   "devDependencies": {
-    "@playwright/test": "1.63.0"
+    "@astrojs/check": "0.9.10",
+    "@types/node": "24.10.1",
+    "typescript": "6.0.3"
   },
   "engines": {
     "node": ">=24.19.0 <25"
