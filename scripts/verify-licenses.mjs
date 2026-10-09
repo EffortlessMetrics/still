@@ -10,7 +10,8 @@ for (const name of ["LICENSE", "LICENSE-MIT", "LICENSE-APACHE"]) {
   assert.ok((await readFile(join(root, "licenses/template", name), "utf8")).length > 100);
 }
 assert.match(await readFile(join(root, "licenses/template/README.md"), "utf8"), /does not license.*replacement content/);
-for (const name of ["astromache", "@effortlessmetrics/still", "@effortlessmetrics/astro-offline", "@effortlessmetrics/static-search"].filter(name => name in application.dependencies)) {
+for (const name of ["astromache", "@effortlessmetrics/still", "@effortlessmetrics/astro-offline"]) {
+  assert.ok(name in application.dependencies, `${name} dependency is required by this starter`);
   const dependency = JSON.parse(await readFile(join(root, "node_modules", name, "package.json"), "utf8"));
   assert.equal(dependency.license, "MIT OR Apache-2.0", "Preserve dependency terms independently");
   for (const notice of ["LICENSE-MIT", "LICENSE-APACHE"])
