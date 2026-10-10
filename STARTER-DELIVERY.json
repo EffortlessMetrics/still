@@ -3,19 +3,22 @@
   "archives": {
     "@effortlessmetrics/still": {
       "file": "vendor/effortlessmetrics-still-0.2.1.tgz",
-      "sha256": "3dde922a9f0b0e7ad1f41f8c60b187901cbdbc3601b13813dad56b508c5dfd84"
+      "sha256": "3dde922a9f0b0e7ad1f41f8c60b187901cbdbc3601b13813dad56b508c5dfd84",
+      "version": "0.2.1"
     },
     "astromache": {
-      "file": "vendor/astromache-0.2.6.tgz",
-      "sha256": "e91c7f64add6553dc3e3be602803efa3ff5d3e6a11936258e2d137e148441f25"
+      "file": "vendor/astromache-0.2.7.tgz",
+      "sha256": "7f723170d181569263227bab692aa16155759c1317d8a9efd7d6f03cc4e38144",
+      "version": "0.2.7"
     },
     "@effortlessmetrics/astro-offline": {
       "file": "vendor/effortlessmetrics-astro-offline-0.1.4.tgz",
-      "sha256": "55d880bfa3fc9dcd650df94a1354040db899130edfb471d8caf45b6fa96e257e"
+      "sha256": "55d880bfa3fc9dcd650df94a1354040db899130edfb471d8caf45b6fa96e257e",
+      "version": "0.1.4"
     }
   },
   "sourceCommits": {
-    "astromache-core": "321252a11fb487a58647487875257a0f95537bf0",
+    "astromache-core": "7ffe28658a0e1fef83d9b640444c0aa02477242e",
     "still-core": "adf78bd6e9798bfb02e2692a6105f7c7c1c8c6d5"
   },
   "offline": true,
@@ -23,6 +26,6 @@
   "applicationLicense": "UNLICENSED",
   "templateCodeLicense": "MIT OR Apache-2.0",
   "upstreamNotices": "licenses/template; replacement content remains owner-controlled",
-  "localBrowserAcceptance": "PASS exact final archive: navigation/prefetch/offline/reconnect/integrity/cache-byte checks",
+  "localBrowserAcceptance": "Historical 0.2.6 browser acceptance; 0.2.7 upgrade qualification recorded separately",
   "hostedAcceptance": "NOT RUN"
 }
