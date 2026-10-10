@@ -21,3 +21,4 @@ jobs:
       - run: npm run check
       - run: npm run build
       - run: node scripts/verify-licenses.mjs
+      - run: npm run test:licenses

@@ -9,7 +9,8 @@
     "check": "astro check",
     "build": "astro build",
     "preview": "astro preview",
-    "verify:licenses": "node scripts/verify-licenses.mjs"
+    "verify:licenses": "node scripts/verify-licenses.mjs",
+    "test:licenses": "node --test scripts/verify-licenses.test.mjs"
   },
   "dependencies": {
     "@effortlessmetrics/still": "file:vendor/effortlessmetrics-still-0.2.1.tgz",

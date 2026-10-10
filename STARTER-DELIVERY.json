@@ -3,15 +3,18 @@
   "archives": {
     "@effortlessmetrics/still": {
       "file": "vendor/effortlessmetrics-still-0.2.1.tgz",
-      "sha256": "3dde922a9f0b0e7ad1f41f8c60b187901cbdbc3601b13813dad56b508c5dfd84"
+      "sha256": "3dde922a9f0b0e7ad1f41f8c60b187901cbdbc3601b13813dad56b508c5dfd84",
+      "version": "0.2.1"
     },
     "astromache": {
       "file": "vendor/astromache-0.2.6.tgz",
-      "sha256": "e91c7f64add6553dc3e3be602803efa3ff5d3e6a11936258e2d137e148441f25"
+      "sha256": "e91c7f64add6553dc3e3be602803efa3ff5d3e6a11936258e2d137e148441f25",
+      "version": "0.2.6"
     },
     "@effortlessmetrics/astro-offline": {
       "file": "vendor/effortlessmetrics-astro-offline-0.1.4.tgz",
-      "sha256": "55d880bfa3fc9dcd650df94a1354040db899130edfb471d8caf45b6fa96e257e"
+      "sha256": "55d880bfa3fc9dcd650df94a1354040db899130edfb471d8caf45b6fa96e257e",
+      "version": "0.1.4"
     }
   },
   "sourceCommits": {
