@@ -14,6 +14,7 @@ assert.match(await readFile(join(root, "licenses/template/README.md"), "utf8"), 
 for (const name of ["astromache", "@effortlessmetrics/still", "@effortlessmetrics/astro-offline"]) {
   assert.ok(name in application.dependencies, `${name} dependency is required by this starter`);
   const dependency = JSON.parse(await readFile(join(root, "node_modules", name, "package.json"), "utf8"));
+  assert.equal(dependency.name, name, `${name} installed package identity must match`);
   const declared = application.dependencies[name];
   if (declared.startsWith("file:")) {
     const receipt = JSON.parse(await readFile(join(root, "STARTER-DELIVERY.json"), "utf8"));

@@ -15,7 +15,14 @@ test('bundled integrity and future exact registry pins retain license boundaries
       await cp(join(source, 'node_modules', name), join(root, 'node_modules', name), { recursive: true });
     const run = () => spawnSync(process.execPath, [resolve(source, 'scripts/verify-licenses.mjs')], { cwd: root, encoding: 'utf8' });
     assert.equal(run().status, 0, 'valid bundled mode');
-    const archive = join(root, 'vendor/astromache-0.2.7.tgz');
+    const installedPath = join(root, 'node_modules/astromache/package.json');
+    const installedBytes = await readFile(installedPath);
+    const wrongIdentity = JSON.parse(installedBytes);
+    wrongIdentity.name = 'different-library';
+    await writeFile(installedPath, JSON.stringify(wrongIdentity));
+    assert.notEqual(run().status, 0, 'installed package name must match required dependency');
+    await writeFile(installedPath, installedBytes);
+    const archive = join(root, 'vendor/astromache-0.2.6.tgz');
     const bytes = await readFile(archive);
     await writeFile(archive, Buffer.concat([bytes, Buffer.from('corruption')]));
     assert.notEqual(run().status, 0, 'corrupted bundled archive must fail');
@@ -25,7 +32,7 @@ test('bundled integrity and future exact registry pins retain license boundaries
     receipt.archives.astromache.version = '0.2.8';
     await writeFile(receiptPath, JSON.stringify(receipt));
     assert.notEqual(run().status, 0, 'bundled installed version must match receipt');
-    receipt.archives.astromache.version = '0.2.7';
+    receipt.archives.astromache.version = '0.2.6';
     receipt.archives.astromache.file = 'vendor/other.tgz';
     await writeFile(receiptPath, JSON.stringify(receipt));
     assert.notEqual(run().status, 0, 'bundled declared path must match receipt');
@@ -41,7 +48,7 @@ test('bundled integrity and future exact registry pins retain license boundaries
     manifest.dependencies.astromache = '0.2.8';
     await writeFile(join(root, 'package.json'), JSON.stringify(manifest));
     assert.notEqual(run().status, 0, 'declared exact version must match installed version');
-    manifest.dependencies.astromache = '^0.2.7';
+    manifest.dependencies.astromache = '^0.2.6';
     await writeFile(join(root, 'package.json'), JSON.stringify(manifest));
     assert.notEqual(run().status, 0, 'floating registry ranges must fail');
   } finally { await rm(root, { recursive: true, force: true }); }

@@ -1,6 +1,6 @@
 # Still service-site starter
 
-A neutral, standalone default with verified offline caching and connection-aware native intent prefetch enabled. Shared components keep their established npm names/imports; canonical static precache setup uses the unpublished astromache 0.2.7 core preset. Cache integrity and lifecycle remain owned by offline 0.1.4.
+A neutral, standalone default with verified offline caching and connection-aware native intent prefetch enabled. Shared components keep their established npm names/imports; canonical static precache setup uses the unpublished astromache 0.2.6 core preset. Cache integrity and lifecycle remain owned by offline 0.1.4.
 
 Use Node 24.19.x. Run npm ci --ignore-scripts, npm run check, npm run build and npm run dev. Exact active archive hashes are in STARTER-DELIVERY.json. These expanded candidates are not yet registry releases.
 
@@ -29,3 +29,5 @@ Keep the application private and UNLICENSED, preserve scoped template notices an
 After an explicitly approved registry release exists, replace a library's file dependency with its exact published version and regenerate package-lock.json. Future registry upgrades need only the exact version and lockfile updates; historical bundled delivery receipts stay unchanged. The license guard requires the installed version to equal that exact pin and retains the library's MIT OR Apache-2.0 notices. Regression fixtures use installed candidate bytes to test registry mode; they do not demonstrate or perform npm publication.
 
 Offline revisions follow emitted output digests: a package version change alone may leave output and worker revision unchanged. Compare generated worker/output before deploying, then verify natural activation, offline reading and reconnect on the actual host. To roll back, restore the prior dependency/lock and matching bundled receipt/archive when applicable, rebuild and review output. Deployment or DNS rollback cannot guarantee rollback of already controlled browser clients; retain the lifecycle and hosted acceptance gates.
+
+Update libraries when a relevant fix or feature is needed; versions need not be leveled across different libraries or consumers. This starter retains its qualified AstroMache 0.2.6 navigation/offline default; the 0.2.7 Article geometry repair does not require an upgrade here.

@@ -7,9 +7,9 @@
       "version": "0.2.1"
     },
     "astromache": {
-      "file": "vendor/astromache-0.2.7.tgz",
-      "sha256": "7f723170d181569263227bab692aa16155759c1317d8a9efd7d6f03cc4e38144",
-      "version": "0.2.7"
+      "file": "vendor/astromache-0.2.6.tgz",
+      "sha256": "e91c7f64add6553dc3e3be602803efa3ff5d3e6a11936258e2d137e148441f25",
+      "version": "0.2.6"
     },
     "@effortlessmetrics/astro-offline": {
       "file": "vendor/effortlessmetrics-astro-offline-0.1.4.tgz",
@@ -18,7 +18,7 @@
     }
   },
   "sourceCommits": {
-    "astromache-core": "7ffe28658a0e1fef83d9b640444c0aa02477242e",
+    "astromache-core": "321252a11fb487a58647487875257a0f95537bf0",
     "still-core": "adf78bd6e9798bfb02e2692a6105f7c7c1c8c6d5"
   },
   "offline": true,
@@ -26,6 +26,6 @@
   "applicationLicense": "UNLICENSED",
   "templateCodeLicense": "MIT OR Apache-2.0",
   "upstreamNotices": "licenses/template; replacement content remains owner-controlled",
-  "localBrowserAcceptance": "Historical 0.2.6 browser acceptance; 0.2.7 upgrade qualification recorded separately",
+  "localBrowserAcceptance": "PASS exact final archive: navigation/prefetch/offline/reconnect/integrity/cache-byte checks",
   "hostedAcceptance": "NOT RUN"
 }
