@@ -3,6 +3,7 @@ export const site = {
   origin: 'https://clear-current.example',
   name: 'Clear Current',
   themeStorageKey: 'clear-current-theme',
+  sitemapExcludedPaths: ['/offline/'],
   navigation: [
     { label: 'Workshops', href: '/workshops/' },
     { label: 'Project support', href: '/project-support/' },

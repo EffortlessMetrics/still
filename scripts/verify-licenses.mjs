@@ -1,14 +1,26 @@
 import assert from "node:assert/strict";
-import { access, readFile } from "node:fs/promises";
+import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { createHash } from "node:crypto";
 const root = process.cwd();
 const application = JSON.parse(await readFile(join(root, "package.json"), "utf8"));
-assert.equal(application.private, true);
-assert.equal(application.license, "UNLICENSED", "Application/content license belongs to its owner");
+function retainedNotice(text, name) {
+  assert.ok(text.length > (name === 'LICENSE' ? 100 : 1000), `${name} notice is retained`);
+  if (name !== 'LICENSE-APACHE')
+    assert.match(text, /Copyright[^\n]*Steven Zimmerman/, `${name} upstream attribution is retained`);
+  if (name === 'LICENSE') assert.match(text, /MIT OR Apache-2\.0/);
+  if (name === 'LICENSE-MIT') {
+    assert.match(text, /Permission is hereby granted/);
+    assert.match(text, /The above copyright notice and this permission notice/);
+    assert.match(text, /THE SOFTWARE IS PROVIDED "AS IS"/);
+  }
+  if (name === 'LICENSE-APACHE') {
+    assert.match(text, /Version 2\.0/);
+    assert.match(text, /END OF TERMS AND CONDITIONS/);
+  }
+}
 for (const name of ["LICENSE", "LICENSE-MIT", "LICENSE-APACHE"]) {
-  await assert.rejects(access(join(root, name)), { code: "ENOENT" });
-  assert.ok((await readFile(join(root, "licenses/template", name), "utf8")).length > 100);
+  retainedNotice(await readFile(join(root, "licenses/template", name), "utf8"), name);
 }
 assert.match(await readFile(join(root, "licenses/template/README.md"), "utf8"), /does not license.*replacement content/);
 for (const name of ["astromache", "@effortlessmetrics/still", "@effortlessmetrics/astro-offline"]) {
@@ -30,6 +42,6 @@ for (const name of ["astromache", "@effortlessmetrics/still", "@effortlessmetric
   }
   assert.equal(dependency.license, "MIT OR Apache-2.0", "Preserve dependency terms independently");
   for (const notice of ["LICENSE-MIT", "LICENSE-APACHE"])
-    assert.ok((await readFile(join(root, "node_modules", name, notice), "utf8")).length > 1000);
+    retainedNotice(await readFile(join(root, "node_modules", name, notice), "utf8"), notice);
 }
-console.log("Application UNLICENSED; upstream template notices scoped; dependency grants retained; replacement content remains owner-controlled.");
+console.log("Upstream template notices scoped; dependency grants retained; application metadata and replacement-content terms remain owner-controlled.");

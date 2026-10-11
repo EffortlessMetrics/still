@@ -28,3 +28,4 @@ jobs:
       - run: npm run verify:starter
       - run: node scripts/verify-licenses.mjs
       - run: npm run test:licenses
+      - run: npm run test:starter
