@@ -106,6 +106,15 @@ test('isolated owner content, sitemap, output directory and negative controls', 
       assert.equal(await verifyStarter({...options, directory:dir}), 10);
       await rm(dir, {recursive:true});
     });
+    await t.test('unmarked owner forms may retain noscript content', async () => {
+      const dir = join(root, 'owner-noscript'); await cp(directory, dir, {recursive:true});
+      await changeHtml(dir, (html) => {
+        assert.match(html, /<form data-starter-contact-example[\s\S]*?<\/form>/);
+        return html.replace(/<form data-starter-contact-example[\s\S]*?<\/form>/, '<form action="/owner-contact"><noscript><p>Email the owner when scripting is unavailable.</p></noscript><input name="message"><button type="submit">Send</button></form>');
+      });
+      assert.equal(await verifyStarter({...options, directory:dir}), 10);
+      await rm(dir, {recursive:true});
+    });
     const controls = [
       ['empty HTML output', async (dir) => {for (const page of await htmlPages(dir)) await rm(join(dir, page.file));}, /at least one site page/],
       ['wrong canonical URL', (dir) => changeHtml(dir, (html) => html.replace(/<link rel="canonical"[^>]*>/, '<link rel="canonical" href="https://wrong.example.invalid/">')), /canonical URL/],
@@ -135,6 +144,8 @@ test('isolated owner content, sitemap, output directory and negative controls', 
       ['raw textarea form terminator hiding an enabled control', (dir) => changeHtml(dir, (html) => html.replace('</fieldset></form>', '</fieldset><textarea disabled></form></textarea><input name="live"></form>')), /every contact example control must be explicitly disabled/],
       ['quoted form terminator hiding an enabled control', (dir) => changeHtml(dir, (html) => html.replace('</fieldset></form>', '</fieldset><input disabled title="</form>"><input name="live"></form>')), /every contact example control must be explicitly disabled/],
       ['nested form hiding an enabled control', (dir) => changeHtml(dir, (html) => html.replace('</fieldset></form>', '</fieldset><form><input name="live"></form></form>')), /contact example cannot contain a nested form/],
+      ['noscript form terminator hiding an enabled submit', (dir) => changeHtml(dir, (html) => html.replace('</fieldset></form>', '</fieldset><noscript></form></noscript><button type="submit">Send live</button></form>')), /contact example cannot contain noscript/],
+      ['noscript native control in a marked example', (dir) => changeHtml(dir, (html) => html.replace('</fieldset></form>', '</fieldset><noscript><input name="live"></noscript></form>')), /contact example cannot contain noscript/],
       ['example marker moved off the form', (dir) => changeHtml(dir, (html) => html.replace('<form data-starter-contact-example', '<form').replace('<fieldset disabled', '<fieldset data-starter-contact-example disabled')), /contact example marker must be on a form/],
       ['backend on marked contact example', (dir) => changeHtml(dir, (html) => html.replace('<form data-starter-contact-example','<form action="/api/contact" data-starter-contact-example')), /contact example has no backend/],
       ['missing OFL notice', (dir) => rm(join(dir,'fonts/OFL-Sans.txt')), {code:'ENOENT'}],

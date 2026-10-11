@@ -67,6 +67,7 @@ function verifyContactExamples(html, file) {
     const end = tags.find((tag) => tag.start > marker.start && tag.name === 'form' && tag.closing);
     assert.ok(end, `${file}: contact example must have a complete form`);
     const inside = tags.filter((tag) => tag.start > marker.start && tag.start < end.start && !tag.closing);
+    assert.ok(!inside.some((tag) => tag.name === 'noscript'), `${file}: contact example cannot contain noscript with scripting-dependent form boundaries`);
     assert.ok(!inside.some((tag) => tag.name === 'form'), `${file}: contact example cannot contain a nested form`);
     assert.ok(!marker.attributes.has('id'), `${file}: contact example has no form ID for external control association`);
     assert.ok(inside.some((tag) => tag.name === 'fieldset' && tag.attributes.has('disabled')), `${file}: contact example stays disabled`);
