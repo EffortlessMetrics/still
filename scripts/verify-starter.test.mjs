@@ -93,6 +93,18 @@ test('isolated owner content, sitemap, output directory and negative controls', 
       receipt.urls = receipt.urls.filter((url) => url !== remove); await writeFile(file, JSON.stringify(receipt));
     };
     const refreshOffline = (dir) => offline(site.offline).hooks['astro:build:done']({dir:pathToFileURL(dir + '/')});
+    const changeRuntime = async (dir, update) => {
+      const file = join(dir, site.offline.workerFile);
+      const worker = await readFile(file, 'utf8');
+      const call = worker.match(/\nOfflineRuntime\.installWorker\((.*),REVISION,PREFIX\);\s*$/);
+      assert.ok(call);
+      const args = JSON.parse('[' + call[1] + ']');
+      update(args);
+      await writeFile(file, worker.replace(call[0], '\nOfflineRuntime.installWorker(' +
+        JSON.stringify(args[0]) + ',' + JSON.stringify(args[1]) + ',REVISION,PREFIX);'));
+    };
+    const withOffline = (settings) => ({...site, offline:{...site.offline, ...settings}});
+    const withWorker = (policy) => withOffline({worker:{...site.offline.worker, ...policy}});
     await t.test('explicitly disabled controls remain valid outside the fieldset and quoted values stay values', async () => {
       const dir = join(root, 'disabled-controls'); await cp(directory, dir, {recursive:true});
       await changeHtml(dir, (html) => html
@@ -171,6 +183,36 @@ test('isolated owner content, sitemap, output directory and negative controls', 
       ['fallback removed from offline receipt', (dir) => changeReceipt(dir,'/fallback/'), /Configured offline fallback/],
       ['ordinary page removed from offline receipt', (dir) => changeReceipt(dir,'/sessions/'), /emitted HTML \/sessions\/ is missing from the offline precache/],
       ['sitemap-excluded page removed from offline receipt', (dir) => changeReceipt(dir,'/private/'), /emitted HTML \/private\/ is missing from the offline precache/],
+      ['ordinary page removed only from runtime entries', (dir) => changeRuntime(dir, ([policy, entries]) => entries.splice(entries.findIndex((entry) => entry.url === '/sessions/'), 1)), /emitted HTML \/sessions\/ is missing from the offline precache/],
+      ['extra JSON argument shifts actual runtime parameters', async (dir) => {
+        const file = join(dir, site.offline.workerFile);
+        const worker = await readFile(file, 'utf8');
+        await writeFile(file, worker.replace(/,REVISION,PREFIX\);$/, ',null,REVISION,PREFIX);'));
+      }, /Offline runtime must have exactly two JSON install arguments/],
+      ['configured cache prefix changed without rebuilding', async () => {}, /Offline cache prefix must match configured/, withOffline({cachePrefix:'changed-consumer-reading-'})],
+      ['receipt revision differs from actual worker revision', async (dir) => {
+        const file = join(dir, 'offline-receipt.json');
+        const receipt = JSON.parse(await readFile(file));
+        receipt.revision = '0'.repeat(20); await writeFile(file, JSON.stringify(receipt));
+      }, /Offline receipt revision must match worker revision/],
+      ['stale runtime digest with valid diagnostic digest', (dir) => changeRuntime(dir, ([policy, entries]) => entries.find((entry) => entry.url === '/sessions/').digest = '0'.repeat(64)), /offline worker digest must match emitted HTML bytes for \/sessions\//],
+      ['conflicting normalized runtime duplicate', (dir) => changeRuntime(dir, ([policy, entries]) => entries.push({url:'/x/../sessions/', digest:'0'.repeat(64)})), /Offline runtime URLs must be unique after normalization: \/sessions\//],
+      ['extra diagnostic URL outside the runtime manifest', async (dir) => {
+        const file = join(dir, site.offline.workerFile);
+        const worker = await readFile(file, 'utf8');
+        const digests = JSON.parse(worker.match(/const DIGESTS=(\{[^\n]+\});/)[1]);
+        digests['/ghost.js'] = '0'.repeat(64);
+        await writeFile(file, worker.replace(/const DIGESTS=(\{[^\n]+\});/, 'const DIGESTS=' + JSON.stringify(digests) + ';'));
+      }, /Offline diagnostic digests must match the actual runtime manifest/],
+      ['extra receipt URL outside the runtime manifest', async (dir) => {
+        const file = join(dir, 'offline-receipt.json');
+        const receipt = JSON.parse(await readFile(file));
+        receipt.urls.push('/ghost.js'); await writeFile(file, JSON.stringify(receipt));
+      }, /Offline receipt URLs must match the actual runtime manifest/],
+      ['configured fallback changed without rebuilding', async () => {}, /Offline worker policy must match configured/, withWorker({navigationFallback:'/contact/index.html'})],
+      ['configured exclusions changed without rebuilding', async () => {}, /Offline worker policy must match configured/, withWorker({excludedPrefixes:['/api/', '/private/']})],
+      ['configured page exclusion changed without rebuilding', async () => {}, /Configured excluded page must not be precached: \/private\//, withOffline({excludedPages:['/redirect/', '/private/']})],
+      ['runtime corpus contains an excluded endpoint', (dir) => changeRuntime(dir, ([policy]) => policy.excludedPrefixes = ['/api/', '/private/']), /Offline runtime corpus must not contain excluded endpoint: \/private\//, withWorker({excludedPrefixes:['/api/', '/private/']})],
       ['HTML changed after worker generation', (dir) => changeHtml(dir,(html) => html.replace('Owner content','Revised owner content')), /offline worker digest must match emitted HTML bytes for \//],
       ['stale canonical digest masked by a valid index alias', async (dir) => {
         const receiptFile=join(dir,'offline-receipt.json');
@@ -181,14 +223,19 @@ test('isolated owner content, sitemap, output directory and negative controls', 
         const digests=JSON.parse(worker.match(/const DIGESTS=(\{[^\n]+\});/)[1]);
         digests['/sessions/index.html']=digests['/sessions/']; digests['/sessions/']='0'.repeat(64);
         await writeFile(workerFile,worker.replace(/const DIGESTS=(\{[^\n]+\});/,'const DIGESTS='+JSON.stringify(digests)+';'));
+        await changeRuntime(dir, ([policy, entries]) => {
+          const canonical = entries.find((entry) => entry.url === '/sessions/');
+          entries.push({url:'/sessions/index.html', digest:canonical.digest});
+          canonical.digest = '0'.repeat(64);
+        });
       }, /offline worker digest must match emitted HTML bytes for \/sessions\//],
       ['missing complete Workbox notice', async (dir) => {const file=join(dir,site.offline.workerFile); await writeFile(file,(await readFile(file,'utf8')).replace(/\/\*! Workbox[\s\S]*?\*\//,''));}, /complete worker WORKBOX-LICENSE/],
       ['missing complete worker owner notice', async (dir) => {const file=join(dir,site.offline.workerFile); await writeFile(file,(await readFile(file,'utf8')).replace(/\/\*! @effortlessmetrics[\s\S]*?\*\//,''));}, /complete worker LICENSE-MIT/],
     ];
-    for (const [index, [label, mutate, expected]] of controls.entries()) {
+    for (const [index, [label, mutate, expected, config = site]] of controls.entries()) {
       await t.test('rejects ' + label, async () => {
         const dir = join(root, 'mutation-' + index); await cp(directory, dir, { recursive: true });
-        await mutate(dir); await assert.rejects(verifyStarter({...options, directory: dir}), expected);
+        await mutate(dir); await assert.rejects(verifyStarter({...options, directory: dir, site:config}), expected);
         await rm(dir, {recursive:true});
       });
     }

@@ -134,24 +134,58 @@ export async function verifyStarter({ directory, site, production, root = proces
   const worker = await read(site.offline.workerFile);
   const manifest = worker.match(/const DIGESTS=(\{[^\n]+\});/);
   assert.ok(manifest, 'Generated worker must contain its offline digest manifest');
+  // Read the pinned integration's JSON arguments, never execute worker code.
+  const runtime = worker.match(/\nOfflineRuntime\.installWorker\((.*),REVISION,PREFIX\);\s*$/);
+  assert.ok(runtime, 'Generated worker must contain its offline runtime install arguments');
+  const args = JSON.parse('[' + runtime[1] + ']');
+  assert.equal(args.length, 2, 'Offline runtime must have exactly two JSON install arguments');
+  const [policy, entries] = args;
+  assert.ok(Array.isArray(entries), 'Offline runtime entries must be an array');
+  const identity = worker.match(/^const REVISION=("[a-f0-9]{20}");const PREFIX=("(?:\\.|[^"\\])*");/m);
+  assert.ok(identity, 'Generated worker must contain its offline revision and cache prefix');
+  assert.equal(JSON.parse(identity[1]), receipt.revision, 'Offline receipt revision must match worker revision');
+  assert.equal(JSON.parse(identity[2]), site.offline.cachePrefix,
+    'Offline cache prefix must match configured site.offline.cachePrefix; rebuild after changing cache ownership');
+  const expectedPolicy = {...site.offline.worker,
+    navigationFallback: site.offline.worker?.navigationFallback?.replace(/index\.html$/, '')};
+  assert.deepEqual(policy, JSON.parse(JSON.stringify(expectedPolicy)),
+    'Offline worker policy must match configured site.offline.worker; rebuild after changing offline policy');
   const normalize = (value) => {
+    assert.equal(typeof value, 'string', 'Offline manifest URLs must be strings');
     const url = new URL(value, origin);
     assert.ok(value.startsWith('/') && url.origin === origin && !url.search && !url.hash,
       'Offline manifest URLs must be same-origin paths without query or fragment');
     return url.pathname;
   };
-  const receiptUrls = new Set(receipt.urls.map(normalize));
-  const digests = new Map(Object.entries(JSON.parse(manifest[1])).map(([url, digest]) => [normalize(url), digest]));
+  const uniqueManifest = (items, label) => {
+    const result = new Map();
+    for (const [url, digest] of items) {
+      const path = normalize(url);
+      assert.ok(!result.has(path), `${label} URLs must be unique after normalization: ${path}`);
+      result.set(path, digest);
+    }
+    return result;
+  };
+  const receiptUrls = new Set(uniqueManifest(receipt.urls.map((url) => [url, null]), 'Offline receipt').keys());
+  const digests = uniqueManifest(Object.entries(JSON.parse(manifest[1])), 'Offline diagnostic');
+  const runtimeDigests = uniqueManifest(entries.map((entry) => {
+    assert.match(entry.digest, /^[a-f0-9]{64}$/, 'Offline runtime entries must have SHA256 digests');
+    return [entry.url, entry.digest];
+  }), 'Offline runtime');
+  const excluded = (path) => path === '/api' ||
+    ['/api/', ...(policy.excludedPrefixes ?? [])].some((prefix) => path.startsWith(prefix));
+  for (const path of runtimeDigests.keys())
+    assert.ok(!excluded(path), `Offline runtime corpus must not contain excluded endpoint: ${path}`);
   for (const {file, route} of pages) {
     if ((site.offline.excludedPages ?? []).includes(route) || route === '/api' ||
         ['/api/', ...(site.offline.worker.excludedPrefixes ?? [])].some((prefix) => route.startsWith(prefix))) continue;
     // The pinned worker recognizes directory URLs and their index.html aliases.
     // Sitemap exclusions alone never remove a page's offline requirement.
     const aliases = route.endsWith('/') ? [route, route + 'index.html'] : [route];
-    const cached = aliases.filter((url) => receiptUrls.has(url));
+    const cached = aliases.filter((url) => receiptUrls.has(url) && runtimeDigests.has(url));
     assert.ok(cached.length, `${file}: emitted HTML ${route} is missing from the offline precache; use directory output or deliberately exclude this route in site.offline`);
     const digest = createHash('sha256').update(await readFile(join(directory, file))).digest('hex');
-    assert.ok(cached.every((url) => digests.get(url) === digest), `${file}: offline worker digest must match emitted HTML bytes for ${route}`);
+    assert.ok(cached.every((url) => runtimeDigests.get(url) === digest && digests.get(url) === digest), `${file}: offline worker digest must match emitted HTML bytes for ${route}`);
   }
   for (const notice of ['WORKBOX-LICENSE', 'LICENSE-MIT']) {
     const text = await readFile(join(root, 'node_modules/@effortlessmetrics/astro-offline', notice), 'utf8');
@@ -165,6 +199,16 @@ export async function verifyStarter({ directory, site, production, root = proces
     assert.match(await read(`fonts/${notice}`), /SIL OPEN FONT LICENSE Version 1\.1/);
   }
   assert.ok(receipt.urls.some((url) => /^\/_astro\/prefetch\..*\.js$/.test(url)), 'Native prefetch is included');
+  assert.deepEqual([...receiptUrls].sort(), [...runtimeDigests.keys()].sort(),
+    'Offline receipt URLs must match the actual runtime manifest');
+  assert.deepEqual([...digests].sort(), [...runtimeDigests].sort(),
+    'Offline diagnostic digests must match the actual runtime manifest');
+  for (const page of site.offline.excludedPages ?? []) {
+    const route = canonicalRoute(page);
+    const aliases = route.endsWith('/') ? [route, route + 'index.html'] : [route];
+    assert.ok(aliases.every((url) => !runtimeDigests.has(normalize(url))),
+      `Configured excluded page must not be precached: ${route}; rebuild after changing site.offline.excludedPages`);
+  }
   return pages.length;
 }
 
