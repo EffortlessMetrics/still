@@ -1,4 +1,4 @@
-import { readdir, readFile, writeFile } from 'node:fs/promises';
+import { readdir, readFile, writeFile, stat } from 'node:fs/promises';
 import { join, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -9,7 +9,8 @@ export const canonicalRoute = (path) => path.replace(/(^|\/)index\.html$/, '$1')
 export async function htmlPages(directory) {
   const files = (await readdir(directory, { recursive: true }))
     .filter((file) => file.endsWith('.html')).sort();
-  return Promise.all(files.map(async (file) => {
+  const pages = await Promise.all(files.map(async (file) => {
+    if (!(await stat(join(directory, file))).isFile()) return null;
     const path = file.split(sep).map(encodeURIComponent).join('/');
     return {
       file,
@@ -17,6 +18,7 @@ export async function htmlPages(directory) {
       html: await readFile(join(directory, file), 'utf8'),
     };
   }));
+  return pages.filter((page) => page !== null);
 }
 
 /** Select unique emitted routes while honoring consumer sitemap exclusions. */

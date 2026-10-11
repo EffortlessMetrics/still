@@ -22,12 +22,19 @@ const escapeXml = (value) => value.replace(/[&<>"']/g, (character) => ({
 const attributeNames = (text) => new Set([...text.matchAll(/([^\t\n\f\r />][^\t\n\f\r />=]*)(?:[\t\n\f\r ]*=[\t\n\f\r ]*(?:"[^"]*"|'[^']*'|[^\t\n\f\r >]+))?/g)]
   .map((match) => match[1].toLowerCase()));
 
-/** Locate static tags using HTML value boundaries, omitting comments/raw text. */
+/** Locate static tags/declarations using value boundaries, omitting raw text. */
 function markupTags(html) {
   const tags = [];
-  const open = /<!--[\s\S]*?-->|<(\/?)([A-Za-z][^\t\n\f\r />]*)/g;
+  const open = /<!--[\s\S]*?-->|<!|<\?|<(\/?)([A-Za-z][^\t\n\f\r />]*)/g;
   for (let match; (match = open.exec(html));) {
-    if (match[0].startsWith('<!--')) continue;
+    if (match[0].startsWith('<!') || match[0] === '<?') {
+      if (!match[0].startsWith('<!--') || match[0] === '<!') {
+        const end = html.indexOf('>', open.lastIndex);
+        open.lastIndex = end < 0 ? html.length : end + 1;
+      }
+      tags.push({name:'declaration', closing:false, start:match.index, end:open.lastIndex, attributes:new Set()});
+      continue;
+    }
     let position = open.lastIndex;
     const attributeStart = position;
     let quote, beforeValue = false, unquotedValue = false;

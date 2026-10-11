@@ -110,7 +110,7 @@ test('isolated owner content, sitemap, output directory and negative controls', 
       const dir = join(root, 'owner-noscript'); await cp(directory, dir, {recursive:true});
       await changeHtml(dir, (html) => {
         assert.match(html, /<form data-starter-contact-example[\s\S]*?<\/form>/);
-        return html.replace(/<form data-starter-contact-example[\s\S]*?<\/form>/, '<form action="/owner-contact"><noscript><p>Email the owner when scripting is unavailable.</p></noscript><select name="topic"><option>Owner topic</option></select><template><input name="future"></template><input name="message"><button type="submit">Send</button></form>');
+        return html.replace(/<form data-starter-contact-example[\s\S]*?<\/form>/, '<form action="/owner-contact"><?owner-note?><!owner-note><!-- Owner comment --><noscript><p>Email the owner when scripting is unavailable.</p></noscript><select name="topic"><option>Owner topic</option></select><template><input name="future"></template><input name="message"><button type="submit">Send</button></form>');
       });
       assert.equal(await verifyStarter({...options, directory:dir}), 10);
       await rm(dir, {recursive:true});
@@ -140,7 +140,9 @@ test('isolated owner content, sitemap, output directory and negative controls', 
       ['enabled textarea in marked example', (dir) => changeHtml(dir, (html) => html.replace('</fieldset></form>', '</fieldset><textarea name="live"></textarea></form>')), /every contact example control must be explicitly disabled/],
       ['external controls associated with a marked form ID', (dir) => changeHtml(dir, (html) => html.replace('<form data-starter-contact-example', '<form id="starter-demo" data-starter-contact-example').replace('</form>', '</form><input form="starter-demo" name="live"><button form="starter-demo" type="submit">Send live</button>')), /contact example has no form ID/],
       ['uppercase marker with enabled controls', (dir) => changeHtml(dir, (html) => html.replaceAll('data-starter-contact-example', 'DATA-STARTER-CONTACT-EXAMPLE').replaceAll(/ disabled(?:="")?/g, '')), /contact example stays disabled/],
-      ['comment form terminator hiding an enabled control', (dir) => changeHtml(dir, (html) => html.replace('</fieldset></form>', '</fieldset><!-- </form> --><input name="live"></form>')), /every contact example control must be explicitly disabled/],
+      ['comment form terminator hiding an enabled control', (dir) => changeHtml(dir, (html) => html.replace('</fieldset></form>', '</fieldset><!-- </form> --><input name="live"></form>')), /contact example cannot contain declaration/],
+      ['processing-instruction bogus comment hiding an enabled submit', (dir) => changeHtml(dir, (html) => html.replace('</fieldset></form>', '</fieldset><?bogus </form>><button type="submit">Send live</button></form>')), /contact example cannot contain declaration/],
+      ['declaration bogus comment hiding an enabled submit', (dir) => changeHtml(dir, (html) => html.replace('</fieldset></form>', '</fieldset><!bogus </form>><button type="submit">Send live</button></form>')), /contact example cannot contain declaration/],
       ['raw textarea form terminator hiding an enabled control', (dir) => changeHtml(dir, (html) => html.replace('</fieldset></form>', '</fieldset><textarea disabled></form></textarea><input name="live"></form>')), /every contact example control must be explicitly disabled/],
       ['quoted form terminator hiding an enabled control', (dir) => changeHtml(dir, (html) => html.replace('</fieldset></form>', '</fieldset><input disabled title="</form>"><input name="live"></form>')), /every contact example control must be explicitly disabled/],
       ['nested form hiding an enabled control', (dir) => changeHtml(dir, (html) => html.replace('</fieldset></form>', '</fieldset><form><input name="live"></form></form>')), /contact example cannot contain a nested form/],
@@ -205,10 +207,10 @@ test('isolated owner content, sitemap, output directory and negative controls', 
       const locations = [...xml.matchAll(/<loc>([^<]*)<\/loc>/g)].map((match) => match[1]);
       assert.deepEqual(locations, ['/', '/file-index.html', '/nested/', '/nested/reindex.html', '/search-index.html'].map((route) => site.origin + route));
     });
-    await t.test('filesystem URL-reserved characters are encoded as path segments in canonical and sitemap URLs', async () => {
+    await t.test('filesystem URL characters are encoded and .html directories are excluded from discovery', async () => {
       const home = await readFile(join(root, 'dist/index.html'), 'utf8');
       const files = [['faq#old.html', '/faq%23old.html'], ['nested/questions?.html', '/nested/questions%3F.html'],
-        ['space name.html', '/space%20name.html'], ['100%.html', '/100%25.html'], ['café.html', '/caf%C3%A9.html'], ['a%23b.html', '/a%2523b.html']];
+        ['space name.html', '/space%20name.html'], ['100%.html', '/100%25.html'], ['café.html', '/caf%C3%A9.html'], ['a%23b.html', '/a%2523b.html'], ['archive.html/index.html', '/archive.html/']];
       for (const [file, route] of files) {
         const destination = join(root, 'public', file);
         await mkdir(dirname(destination), {recursive:true});
@@ -217,7 +219,7 @@ test('isolated owner content, sitemap, output directory and negative controls', 
       }
       succeeds(run(root, 'npm', ['run','build']));
       const verified = run(root, 'npm', ['run','verify:starter']); succeeds(verified);
-      assert.match(verified.stdout, /11 HTML files/);
+      assert.match(verified.stdout, /12 HTML files/);
       const xml = await readFile(join(root, 'dist/sitemap.xml'), 'utf8');
       const locations = [...xml.matchAll(/<loc>([^<]*)<\/loc>/g)].map((match) => match[1]);
       const routes = ['/', '/file-index.html', '/nested/', '/nested/reindex.html', '/search-index.html', ...files.map(([, route]) => route)].sort();
