@@ -8,6 +8,77 @@ import { spawnSync } from 'node:child_process';
 const source = process.cwd();
 const guard = resolve(source, 'scripts/verify-licenses.mjs');
 const names = ['astromache', '@effortlessmetrics/still', '@effortlessmetrics/astro-offline'];
+
+/** Run ownership scenarios in an isolated consumer and remove it after failures. */
+async function consumerFixture(action) {
+  const root = await mkdtemp(join(tmpdir(), 'still-owner-licenses-'));
+  try {
+    for (const file of ['package.json', 'licenses', 'vendor', 'STARTER-DELIVERY.json'])
+      await cp(join(source, file), join(root, file), { recursive: true });
+    for (const name of names)
+      await cp(join(source, 'node_modules', name), join(root, 'node_modules', name), { recursive: true });
+    const run = () => spawnSync(process.execPath, [guard], { cwd: root, encoding: 'utf8' });
+    await action(root, run);
+  } finally { await rm(root, { recursive: true, force: true }); }
+}
+
+test('application terms, privacy and scoped owner notices are independent of retained upstream grants', async () => {
+  await consumerFixture(async (root, run) => {
+    await writeFile(join(root, 'LICENSE'), 'All rights reserved for independently authored application content. Reused upstream template material retains its separate grants in licenses/template/. Fonts and dependencies retain their own terms.\n');
+    const manifest = JSON.parse(await readFile(join(root, 'package.json')));
+    for (const choice of [
+      { private: true, license: 'UNLICENSED' },
+      { private: true, license: 'MIT' },
+      { private: false, license: 'LicenseRef-Proprietary' },
+    ]) {
+      await writeFile(join(root, 'package.json'), JSON.stringify({ ...manifest, ...choice }));
+      const result = run();
+      assert.equal(result.status, 0, result.stderr);
+    }
+  });
+});
+
+test('owner notices do not replace required template or component notices', async () => {
+  await consumerFixture(async (root, run) => {
+    await writeFile(join(root, 'LICENSE'), await readFile(join(root, 'licenses/template/LICENSE-MIT')));
+    for (const path of ['licenses/template/LICENSE-MIT', 'node_modules/@effortlessmetrics/still/LICENSE-APACHE']) {
+      const bytes = await readFile(join(root, path));
+      await rm(join(root, path));
+      const result = run();
+      assert.notEqual(result.status, 0, path);
+      assert.match(result.stderr, /ENOENT/);
+      await writeFile(join(root, path), bytes);
+    }
+    const mitPath = join(root, 'node_modules/@effortlessmetrics/still/LICENSE-MIT');
+    const mit = await readFile(mitPath, 'utf8');
+    await writeFile(mitPath, mit.replace('Steven Zimmerman', 'Unrelated Rights Holder'));
+    assert.notEqual(run().status, 0, 'Owner application terms cannot erase upstream attribution');
+    await writeFile(mitPath, mit);
+    const result = run();
+    assert.equal(result.status, 0, result.stderr);
+  });
+});
+test('complete Apache terms survive formatting changes; missing patent grants fail in every notice', async () => {
+  await consumerFixture(async (root, run) => {
+    for (const path of ['licenses/template/LICENSE-APACHE', ...names.map((name) => 'node_modules/' + name + '/LICENSE-APACHE')]) {
+      const file = join(root, path);
+      const original = await readFile(file, 'utf8');
+      const incomplete = original.replace(/3\. Grant of Patent License\.[\s\S]*?(?=4\. Redistribution\.)/, '');
+      assert.notEqual(incomplete, original);
+      assert.ok(incomplete.length > 1000);
+      assert.match(incomplete, /Version 2\.0/);
+      assert.match(incomplete, /END OF TERMS AND CONDITIONS/);
+      await writeFile(file, incomplete);
+      const rejected = run();
+      assert.notEqual(rejected.status, 0, path);
+      assert.match(rejected.stderr, /complete Apache 2\.0 terms are retained/);
+      await writeFile(file, original.replace(/\s+/g, ' \r\n'));
+      const formatted = run();
+      assert.equal(formatted.status, 0, formatted.stderr);
+      await writeFile(file, original);
+    }
+  });
+});
 test('active delivery and version-independent bundled/registry license fixtures', async () => {
   const actual = spawnSync(process.execPath, [guard], { cwd: source, encoding: 'utf8' });
   assert.equal(actual.status, 0, actual.stderr);

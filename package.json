@@ -11,7 +11,8 @@
     "preview": "astro preview",
     "verify:starter": "node scripts/verify-starter.mjs",
     "verify:licenses": "node scripts/verify-licenses.mjs",
-    "test:licenses": "node --test scripts/verify-licenses.test.mjs"
+    "test:licenses": "node --test scripts/verify-licenses.test.mjs",
+    "test:starter": "node --test --test-concurrency=1 scripts/verify-starter.test.mjs"
   },
   "dependencies": {
     "@effortlessmetrics/still": "file:vendor/effortlessmetrics-still-0.2.1.tgz",
