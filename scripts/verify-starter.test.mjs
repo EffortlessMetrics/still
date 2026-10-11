@@ -190,5 +190,23 @@ test('isolated owner content, sitemap, output directory and negative controls', 
       const locations = [...xml.matchAll(/<loc>([^<]*)<\/loc>/g)].map((match) => match[1]);
       assert.deepEqual(locations, ['/', '/file-index.html', '/nested/', '/nested/reindex.html', '/search-index.html'].map((route) => site.origin + route));
     });
+    await t.test('filesystem URL-reserved characters are encoded as path segments in canonical and sitemap URLs', async () => {
+      const home = await readFile(join(root, 'dist/index.html'), 'utf8');
+      const files = [['faq#old.html', '/faq%23old.html'], ['nested/questions?.html', '/nested/questions%3F.html'],
+        ['space name.html', '/space%20name.html'], ['100%.html', '/100%25.html'], ['café.html', '/caf%C3%A9.html'], ['a%23b.html', '/a%2523b.html']];
+      for (const [file, route] of files) {
+        const destination = join(root, 'public', file);
+        await mkdir(dirname(destination), {recursive:true});
+        await writeFile(destination, home.replaceAll(`content="${site.origin}/"`, `content="${site.origin}${route}"`)
+          .replaceAll(`href="${site.origin}/"`, `href="${site.origin}${route}"`));
+      }
+      succeeds(run(root, 'npm', ['run','build']));
+      const verified = run(root, 'npm', ['run','verify:starter']); succeeds(verified);
+      assert.match(verified.stdout, /11 HTML files/);
+      const xml = await readFile(join(root, 'dist/sitemap.xml'), 'utf8');
+      const locations = [...xml.matchAll(/<loc>([^<]*)<\/loc>/g)].map((match) => match[1]);
+      const routes = ['/', '/file-index.html', '/nested/', '/nested/reindex.html', '/search-index.html', ...files.map(([, route]) => route)].sort();
+      assert.deepEqual(locations, routes.map((route) => site.origin + route));
+    });
   } finally { await rm(root, {recursive:true,force:true}); }
 });

@@ -1,16 +1,16 @@
 import { readdir, readFile, writeFile } from 'node:fs/promises';
-import { join } from 'node:path';
+import { join, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 /** Map emitted index.html paths to the directory URLs used by the starter. */
 export const canonicalRoute = (path) => path.replace(/(^|\/)index\.html$/, '$1');
 
-/** Read all emitted HTML, preserving both 404 copies for output verification. */
+/** Read emitted HTML with encoded URL segments, preserving both 404 copies. */
 export async function htmlPages(directory) {
   const files = (await readdir(directory, { recursive: true }))
     .filter((file) => file.endsWith('.html')).sort();
   return Promise.all(files.map(async (file) => {
-    const path = file.replaceAll('\\', '/');
+    const path = file.split(sep).map(encodeURIComponent).join('/');
     return {
       file,
       route: path === '404.html' ? '/404/' : canonicalRoute('/' + path),
