@@ -2,13 +2,15 @@
 
 A neutral, standalone default with verified offline caching and connection-aware native intent prefetch enabled. Shared components keep their established npm names/imports; canonical static precache setup uses the unpublished astromache 0.2.6 core preset. Cache integrity and lifecycle remain owned by offline 0.1.4.
 
-Use Node 24.19.x. Run npm ci --ignore-scripts, npm run check, npm run build and npm run dev. Exact active archive hashes are in STARTER-DELIVERY.json. These expanded candidates are not yet registry releases.
+Use Node 24.19.x. Run `npm ci --ignore-scripts`, `npm run check`, `npm run build`, `npm run verify:starter`, `npm run verify:licenses` and `npm run test:licenses`. Use `npm run dev` for local editing or `npm run preview` to inspect the static build. Exact active archive hashes are in STARTER-DELIVERY.json. These expanded candidates are not yet registry releases.
 
-Replace neutral content/branding and edit site.config.mjs. Keep API and host redirect URLs out of the precache using excludedPages and excludedPrefixes. Query policy is explicitly stripQuery:false. Registration follows site.offline.workerFile at root scope; edit that setting to rename the generated and registered worker together, and update the worker path in public/_headers to preserve its no-cache policy. Scope remains configured in the small layout registration call. Natural activation waits for existing clients; no forced reload or activation occurs.
+Edit `site.config.mjs` for the public origin, site name, navigation, footer link, theme storage key and offline policy. Replace page prose in `src/pages/`, styling in `src/styles/starter.css` and the favicon in `public/`. Configuration is public and may be bundled into browser code. Keep API and host redirect URLs out of the precache using excludedPages and excludedPrefixes. Query policy is explicitly stripQuery:false. Registration follows site.offline.workerFile at root scope; edit that setting to rename the generated and registered worker together, and update the worker path in public/_headers to preserve its no-cache policy. Scope remains configured in the small layout registration call. Natural activation waits for existing clients; no forced reload or activation occurs.
+
+Builds default to preview indexing policy: every page uses `noindex,nofollow` and `robots.txt` disallows crawling. After replacing the example origin and content, build for an indexable production site with `PUBLIC_SITE_ENV=production npm run build`, then run `PUBLIC_SITE_ENV=production npm run verify:starter`. Set the same environment variable in your host's build configuration. `npm run preview` serves the policy already emitted by the build. This flag does not approve deployment or supply a contact service; the sample form remains disabled.
 
 Static HTML must remain byte-identical to selected build output. _headers supplies no-transform on compatible static hosts; host Functions and other serving products require equivalent policy. Hosted exact-byte and fresh install/offline/reconnect checks remain NOT RUN. Local browser acceptance is not deployment approval.
 
-Owner code is MIT OR Apache-2.0; retain packaged OFL font notices and Workbox MIT notices. Private content/history and producer qualification infrastructure are not part of this starter.
+Upstream template/library code and original neutral examples are MIT OR Apache-2.0; the application package remains UNLICENSED. Retain packaged OFL font notices and Workbox MIT notices. Private content/history and producer qualification infrastructure are not part of this starter.
 
 ## Source ownership
 
