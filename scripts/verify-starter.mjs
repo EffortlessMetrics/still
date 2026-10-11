@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -131,6 +132,27 @@ export async function verifyStarter({ directory, site, production, root = proces
   const receipt = JSON.parse(await read('offline-receipt.json'));
   assert.ok(receipt.urls.includes(canonicalRoute(site.offline.worker.navigationFallback)), 'Configured offline fallback is precached');
   const worker = await read(site.offline.workerFile);
+  const manifest = worker.match(/const DIGESTS=(\{[^\n]+\});/);
+  assert.ok(manifest, 'Generated worker must contain its offline digest manifest');
+  const normalize = (value) => {
+    const url = new URL(value, origin);
+    assert.ok(value.startsWith('/') && url.origin === origin && !url.search && !url.hash,
+      'Offline manifest URLs must be same-origin paths without query or fragment');
+    return url.pathname;
+  };
+  const receiptUrls = new Set(receipt.urls.map(normalize));
+  const digests = new Map(Object.entries(JSON.parse(manifest[1])).map(([url, digest]) => [normalize(url), digest]));
+  for (const {file, route} of pages) {
+    if ((site.offline.excludedPages ?? []).includes(route) || route === '/api' ||
+        ['/api/', ...(site.offline.worker.excludedPrefixes ?? [])].some((prefix) => route.startsWith(prefix))) continue;
+    // The pinned worker recognizes directory URLs and their index.html aliases.
+    // Sitemap exclusions alone never remove a page's offline requirement.
+    const aliases = route.endsWith('/') ? [route, route + 'index.html'] : [route];
+    const cached = aliases.filter((url) => receiptUrls.has(url));
+    assert.ok(cached.length, `${file}: emitted HTML ${route} is missing from the offline precache; use directory output or deliberately exclude this route in site.offline`);
+    const digest = createHash('sha256').update(await readFile(join(directory, file))).digest('hex');
+    assert.ok(cached.every((url) => digests.get(url) === digest), `${file}: offline worker digest must match emitted HTML bytes for ${route}`);
+  }
   for (const notice of ['WORKBOX-LICENSE', 'LICENSE-MIT']) {
     const text = await readFile(join(root, 'node_modules/@effortlessmetrics/astro-offline', notice), 'utf8');
     assert.ok(worker.includes(text.trim()), `Keep complete worker ${notice} notice`);
@@ -153,5 +175,5 @@ if (process.argv[1] && pathToFileURL(process.argv[1]).href === import.meta.url) 
   const {site} = await import(pathToFileURL(join(root, 'site.config.mjs')));
   const production = process.env.PUBLIC_SITE_ENV === 'production';
   const count = await verifyStarter({directory: fileURLToPath(config.outDir), site, production, root});
-  console.log(`Starter output passes: ${count} HTML files, ${production ? 'production' : 'preview'} indexing, configured identity/links/sitemap, marked contact examples, offline fallback/fonts and notices.`);
+  console.log(`Starter output passes: ${count} HTML files, ${production ? 'production' : 'preview'} indexing, configured identity/links/sitemap, marked contact examples, offline page digests/fallback/fonts and notices.`);
 }
