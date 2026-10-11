@@ -99,6 +99,13 @@ test('isolated owner content, sitemap, output directory and negative controls', 
       assert.equal(await verifyStarter({...options, directory:dir}), 10);
       await rm(dir, {recursive:true});
     });
+    await t.test('consumer demo button label, type and attribute order remain owner-controlled', async () => {
+      const dir = join(root, 'owner-demo-button'); await cp(directory, dir, {recursive:true});
+      await changeHtml(dir, (html) => html.replace(/<button type="button" disabled(?:="")?>Sending unavailable<\/button>/,
+        '<BUTTON DISABLED aria-label="Contact is unavailable" type="submit">Owner contact unavailable</BUTTON>'));
+      assert.equal(await verifyStarter({...options, directory:dir}), 10);
+      await rm(dir, {recursive:true});
+    });
     const controls = [
       ['empty HTML output', async (dir) => {for (const page of await htmlPages(dir)) await rm(join(dir, page.file));}, /at least one site page/],
       ['wrong canonical URL', (dir) => changeHtml(dir, (html) => html.replace(/<link rel="canonical"[^>]*>/, '<link rel="canonical" href="https://wrong.example.invalid/">')), /canonical URL/],
@@ -109,6 +116,7 @@ test('isolated owner content, sitemap, output directory and negative controls', 
       ['missing sitemap route', async (dir) => {const file=join(dir,'sitemap.xml'); await writeFile(file,(await readFile(file,'utf8')).replace(/<url><loc>[^<]*<\/loc><\/url>/,''));}, /Sitemap must list exactly/],
       ['incomplete sitemap document', async (dir) => {const file=join(dir,'sitemap.xml'); await writeFile(file,(await readFile(file,'utf8')).replace('</urlset>',''));}, /complete document/],
       ['enabled marked contact example', (dir) => changeHtml(dir, (html) => html.replace(/<fieldset disabled(?:="")?>/,'<fieldset>')), /contact example stays disabled/],
+      ['missing disabled demo button', (dir) => changeHtml(dir, (html) => html.replace(/<button type="button" disabled(?:="")?>Sending unavailable<\/button>/, '')), /contact example must contain an explicitly disabled button/],
       ['enabled input outside the disabled fieldset', (dir) => changeHtml(dir, (html) => html.replace('</fieldset></form>', '</fieldset><input name="live"></form>')), /every contact example control must be explicitly disabled/],
       ['enabled submit outside the disabled fieldset', (dir) => changeHtml(dir, (html) => html.replace('</fieldset></form>', '</fieldset><button type="submit">Send live</button></form>')), /every contact example control must be explicitly disabled/],
       ['enabled control in the first legend', (dir) => changeHtml(dir, (html) => html.replace('<legend>', '<legend><input name="live">')), /every contact example control must be explicitly disabled/],

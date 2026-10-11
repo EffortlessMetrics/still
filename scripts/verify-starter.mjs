@@ -70,7 +70,7 @@ function verifyContactExamples(html, file) {
     assert.ok(!inside.some((tag) => tag.name === 'form'), `${file}: contact example cannot contain a nested form`);
     assert.ok(!marker.attributes.has('id'), `${file}: contact example has no form ID for external control association`);
     assert.ok(inside.some((tag) => tag.name === 'fieldset' && tag.attributes.has('disabled')), `${file}: contact example stays disabled`);
-    assert.ok(inside.some((tag) => tag.name === 'button' && /^<button\s+type="button"\s+disabled(?:="")?>Sending unavailable<\/button>/.test(html.slice(tag.start))));
+    assert.ok(inside.some((tag) => tag.name === 'button' && tag.attributes.has('disabled')), `${file}: contact example must contain an explicitly disabled button`);
     assert.ok(!marker.attributes.has('action'), `${file}: contact example has no backend`);
     // Explicit control attributes avoid fieldset inheritance and its first-legend
     // exemption, and cover controls moved outside the disabled fieldset.
