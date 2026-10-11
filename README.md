@@ -32,6 +32,8 @@ The application package starts as `UNLICENSED`. There is no blanket root site li
 
 ## Upgrading shared libraries
 
+Use the [copyable delivery and source checks](UPGRADING.md) to verify archive/lock/installed bytes and the recorded offline producer comparison before an upgrade. The offline comparison records an independently checked commit/tree and its manifest packaging difference; it does not establish the archive's original packing commit. The commands use an optional producer checkout for provenance auditing, while normal application builds remain standalone.
+
 Preserve your chosen application terms, scoped template notices and OFL font notices, and upgrade each library independently. For a bundled candidate, replace its exact vendor archive, dependency path and lockfile; update STARTER-DELIVERY.json with the reviewed archive path, SHA256 and version. Run `npm ci --ignore-scripts`, `npm run verify:licenses`, `npm run test:licenses`, `npm run check`, `npm run build`, `npm run verify:starter` and `npm run test:starter`, using the same preview/production environment for build and verification.
 
 After an explicitly approved registry release exists, replace a library's file dependency with its exact published version and regenerate package-lock.json. Future registry upgrades need only the exact version and lockfile updates; historical bundled delivery receipts stay unchanged. The license guard requires the installed version to equal that exact pin and retains the library's MIT OR Apache-2.0 notices. Regression fixtures use installed candidate bytes to test registry mode; they do not demonstrate or perform npm publication.
