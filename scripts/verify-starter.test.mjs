@@ -4,8 +4,9 @@ import { cp, mkdtemp, mkdir, readFile, writeFile, rm, rename } from 'node:fs/pro
 import { createHash } from 'node:crypto';
 import { tmpdir } from 'node:os';
 import { join, dirname, relative } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { spawnSync } from 'node:child_process';
+import offline from 'astromache/static-offline';
 import { site as defaults } from '../site.config.mjs';
 import { verifyStarter } from './verify-starter.mjs';
 import { htmlPages } from './site-output.mjs';
@@ -91,11 +92,25 @@ test('isolated owner content, sitemap, output directory and negative controls', 
       const file = join(dir, 'offline-receipt.json'); const receipt = JSON.parse(await readFile(file));
       receipt.urls = receipt.urls.filter((url) => url !== remove); await writeFile(file, JSON.stringify(receipt));
     };
+    const refreshOffline = (dir) => offline(site.offline).hooks['astro:build:done']({dir:pathToFileURL(dir + '/')});
+    const changeRuntime = async (dir, update) => {
+      const file = join(dir, site.offline.workerFile);
+      const worker = await readFile(file, 'utf8');
+      const call = worker.match(/\nOfflineRuntime\.installWorker\((.*),REVISION,PREFIX\);\s*$/);
+      assert.ok(call);
+      const args = JSON.parse('[' + call[1] + ']');
+      update(args);
+      await writeFile(file, worker.replace(call[0], '\nOfflineRuntime.installWorker(' +
+        JSON.stringify(args[0]) + ',' + JSON.stringify(args[1]) + ',REVISION,PREFIX);'));
+    };
+    const withOffline = (settings) => ({...site, offline:{...site.offline, ...settings}});
+    const withWorker = (policy) => withOffline({worker:{...site.offline.worker, ...policy}});
     await t.test('explicitly disabled controls remain valid outside the fieldset and quoted values stay values', async () => {
       const dir = join(root, 'disabled-controls'); await cp(directory, dir, {recursive:true});
       await changeHtml(dir, (html) => html
         .replace('<form data-starter-contact-example', '<form title="action=/example > text" DATA-STARTER-CONTACT-EXAMPLE')
         .replace('</fieldset></form>', '</fieldset><INPUT title="example > text" DISABLED=""/><button disabled type="submit">Unavailable</button><textarea disabled></textarea></form>'));
+      await refreshOffline(dir);
       assert.equal(await verifyStarter({...options, directory:dir}), 10);
       await rm(dir, {recursive:true});
     });
@@ -103,6 +118,7 @@ test('isolated owner content, sitemap, output directory and negative controls', 
       const dir = join(root, 'owner-demo-button'); await cp(directory, dir, {recursive:true});
       await changeHtml(dir, (html) => html.replace(/<button type="button" disabled(?:="")?>Sending unavailable<\/button>/,
         '<BUTTON DISABLED aria-label="Contact is unavailable" type="submit">Owner contact unavailable</BUTTON>'));
+      await refreshOffline(dir);
       assert.equal(await verifyStarter({...options, directory:dir}), 10);
       await rm(dir, {recursive:true});
     });
@@ -112,6 +128,7 @@ test('isolated owner content, sitemap, output directory and negative controls', 
         assert.match(html, /<form data-starter-contact-example[\s\S]*?<\/form>/);
         return html.replace(/<form data-starter-contact-example[\s\S]*?<\/form>/, '<form action="/owner-contact"><?owner-note?><!owner-note><!-- Owner comment --><noscript><p>Email the owner when scripting is unavailable.</p></noscript><select name="topic"><option>Owner topic</option></select><template><input name="future"></template><input name="message"><button type="submit">Send</button></form>');
       });
+      await refreshOffline(dir);
       assert.equal(await verifyStarter({...options, directory:dir}), 10);
       await rm(dir, {recursive:true});
     });
@@ -164,13 +181,61 @@ test('isolated owner content, sitemap, output directory and negative controls', 
       ['missing font bytes', (dir) => rm(join(dir,'fonts/IBMPlexSans.ttf')), {code:'ENOENT'}],
       ['font removed from offline receipt', (dir) => changeReceipt(dir,'/fonts/IBMPlexSans.ttf'), /offline font delivery/],
       ['fallback removed from offline receipt', (dir) => changeReceipt(dir,'/fallback/'), /Configured offline fallback/],
+      ['ordinary page removed from offline receipt', (dir) => changeReceipt(dir,'/sessions/'), /emitted HTML \/sessions\/ is missing from the offline precache/],
+      ['sitemap-excluded page removed from offline receipt', (dir) => changeReceipt(dir,'/private/'), /emitted HTML \/private\/ is missing from the offline precache/],
+      ['ordinary page removed only from runtime entries', (dir) => changeRuntime(dir, ([policy, entries]) => entries.splice(entries.findIndex((entry) => entry.url === '/sessions/'), 1)), /emitted HTML \/sessions\/ is missing from the offline precache/],
+      ['extra JSON argument shifts actual runtime parameters', async (dir) => {
+        const file = join(dir, site.offline.workerFile);
+        const worker = await readFile(file, 'utf8');
+        await writeFile(file, worker.replace(/,REVISION,PREFIX\);$/, ',null,REVISION,PREFIX);'));
+      }, /Offline runtime must have exactly two JSON install arguments/],
+      ['configured cache prefix changed without rebuilding', async () => {}, /Offline cache prefix must match configured/, withOffline({cachePrefix:'changed-consumer-reading-'})],
+      ['receipt revision differs from actual worker revision', async (dir) => {
+        const file = join(dir, 'offline-receipt.json');
+        const receipt = JSON.parse(await readFile(file));
+        receipt.revision = '0'.repeat(20); await writeFile(file, JSON.stringify(receipt));
+      }, /Offline receipt revision must match worker revision/],
+      ['stale runtime digest with valid diagnostic digest', (dir) => changeRuntime(dir, ([policy, entries]) => entries.find((entry) => entry.url === '/sessions/').digest = '0'.repeat(64)), /offline worker digest must match emitted HTML bytes for \/sessions\//],
+      ['conflicting normalized runtime duplicate', (dir) => changeRuntime(dir, ([policy, entries]) => entries.push({url:'/x/../sessions/', digest:'0'.repeat(64)})), /Offline runtime URLs must be unique after normalization: \/sessions\//],
+      ['extra diagnostic URL outside the runtime manifest', async (dir) => {
+        const file = join(dir, site.offline.workerFile);
+        const worker = await readFile(file, 'utf8');
+        const digests = JSON.parse(worker.match(/const DIGESTS=(\{[^\n]+\});/)[1]);
+        digests['/ghost.js'] = '0'.repeat(64);
+        await writeFile(file, worker.replace(/const DIGESTS=(\{[^\n]+\});/, 'const DIGESTS=' + JSON.stringify(digests) + ';'));
+      }, /Offline diagnostic digests must match the actual runtime manifest/],
+      ['extra receipt URL outside the runtime manifest', async (dir) => {
+        const file = join(dir, 'offline-receipt.json');
+        const receipt = JSON.parse(await readFile(file));
+        receipt.urls.push('/ghost.js'); await writeFile(file, JSON.stringify(receipt));
+      }, /Offline receipt URLs must match the actual runtime manifest/],
+      ['configured fallback changed without rebuilding', async () => {}, /Offline worker policy must match configured/, withWorker({navigationFallback:'/contact/index.html'})],
+      ['configured exclusions changed without rebuilding', async () => {}, /Offline worker policy must match configured/, withWorker({excludedPrefixes:['/api/', '/private/']})],
+      ['configured page exclusion changed without rebuilding', async () => {}, /Configured excluded page must not be precached: \/private\//, withOffline({excludedPages:['/redirect/', '/private/']})],
+      ['runtime corpus contains an excluded endpoint', (dir) => changeRuntime(dir, ([policy]) => policy.excludedPrefixes = ['/api/', '/private/']), /Offline runtime corpus must not contain excluded endpoint: \/private\//, withWorker({excludedPrefixes:['/api/', '/private/']})],
+      ['HTML changed after worker generation', (dir) => changeHtml(dir,(html) => html.replace('Owner content','Revised owner content')), /offline worker digest must match emitted HTML bytes for \//],
+      ['stale canonical digest masked by a valid index alias', async (dir) => {
+        const receiptFile=join(dir,'offline-receipt.json');
+        const receipt=JSON.parse(await readFile(receiptFile));
+        receipt.urls.push('/sessions/index.html'); await writeFile(receiptFile,JSON.stringify(receipt));
+        const workerFile=join(dir,site.offline.workerFile);
+        const worker=await readFile(workerFile,'utf8');
+        const digests=JSON.parse(worker.match(/const DIGESTS=(\{[^\n]+\});/)[1]);
+        digests['/sessions/index.html']=digests['/sessions/']; digests['/sessions/']='0'.repeat(64);
+        await writeFile(workerFile,worker.replace(/const DIGESTS=(\{[^\n]+\});/,'const DIGESTS='+JSON.stringify(digests)+';'));
+        await changeRuntime(dir, ([policy, entries]) => {
+          const canonical = entries.find((entry) => entry.url === '/sessions/');
+          entries.push({url:'/sessions/index.html', digest:canonical.digest});
+          canonical.digest = '0'.repeat(64);
+        });
+      }, /offline worker digest must match emitted HTML bytes for \/sessions\//],
       ['missing complete Workbox notice', async (dir) => {const file=join(dir,site.offline.workerFile); await writeFile(file,(await readFile(file,'utf8')).replace(/\/\*! Workbox[\s\S]*?\*\//,''));}, /complete worker WORKBOX-LICENSE/],
       ['missing complete worker owner notice', async (dir) => {const file=join(dir,site.offline.workerFile); await writeFile(file,(await readFile(file,'utf8')).replace(/\/\*! @effortlessmetrics[\s\S]*?\*\//,''));}, /complete worker LICENSE-MIT/],
     ];
-    for (const [index, [label, mutate, expected]] of controls.entries()) {
+    for (const [index, [label, mutate, expected, config = site]] of controls.entries()) {
       await t.test('rejects ' + label, async () => {
         const dir = join(root, 'mutation-' + index); await cp(directory, dir, { recursive: true });
-        await mutate(dir); await assert.rejects(verifyStarter({...options, directory: dir}), expected);
+        await mutate(dir); await assert.rejects(verifyStarter({...options, directory: dir, site:config}), expected);
         await rm(dir, {recursive:true});
       });
     }
@@ -196,7 +261,7 @@ test('isolated owner content, sitemap, output directory and negative controls', 
       assert.notEqual(missing.status, 0);
       assert.match(missing.stderr, /ENOENT/); assert.match(missing.stderr, /consumer-output/);
     });
-    await t.test('file output and public HTML retain basenames that only end in index.html', async () => {
+    await t.test('file output and public HTML retain sitemap basenames but fail incomplete offline coverage', async () => {
       const home = await readFile(join(root, 'dist/index.html'), 'utf8');
       for (const [file, route] of [['search-index.html', '/search-index.html'], ['nested/reindex.html', '/nested/reindex.html'], ['nested/index.html', '/nested/']]) {
         const destination = join(root, 'public', file);
@@ -207,13 +272,28 @@ test('isolated owner content, sitemap, output directory and negative controls', 
       await writePage(root, 'file-index.astro', '/file-index.html', '<p>Owner file-format route.</p>');
       await writeFile(join(root, 'astro.config.mjs'), "import config from './astro.base.mjs';\nexport default {...config, outDir:'./dist/', build:{...config.build, format:'file'}};\n");
       succeeds(run(root, 'npm', ['run','build']));
-      const verified = run(root, 'npm', ['run','verify:starter']); succeeds(verified);
-      assert.match(verified.stdout, /5 HTML files/);
+      const verified = run(root, 'npm', ['run','verify:starter']);
+      assert.notEqual(verified.status, 0);
+      assert.match(verified.stderr, /emitted HTML \/file-index\.html is missing from the offline precache/);
       const xml = await readFile(join(root, 'dist/sitemap.xml'), 'utf8');
       const locations = [...xml.matchAll(/<loc>([^<]*)<\/loc>/g)].map((match) => match[1]);
       assert.deepEqual(locations, ['/', '/file-index.html', '/nested/', '/nested/reindex.html', '/search-index.html'].map((route) => site.origin + route));
+      const receipt = JSON.parse(await readFile(join(root, 'dist/offline-receipt.json')));
+      assert.ok(receipt.urls.includes('/nested/'));
+      assert.ok(!receipt.urls.includes('/file-index.html') && !receipt.urls.includes('/search-index.html') && !receipt.urls.includes('/nested/reindex.html'));
     });
-    await t.test('filesystem URL characters are encoded and .html directories are excluded from discovery', async () => {
+    await t.test('owner can deliberately exclude standalone HTML from offline coverage', async () => {
+      site.offline.excludedPages = ['/file-index.html','/search-index.html','/nested/reindex.html'];
+      await saveSite();
+      try {
+        succeeds(run(root,'npm',['run','build']));
+        const verified=run(root,'npm',['run','verify:starter']); succeeds(verified);
+        assert.match(verified.stdout,/5 HTML files/);
+        const xml=await readFile(join(root,'dist/sitemap.xml'),'utf8');
+        assert.deepEqual([...xml.matchAll(/<loc>([^<]*)<\/loc>/g)].map((match) => match[1]),[site.origin+'/',site.origin+'/nested/']);
+      } finally {site.offline.excludedPages=[];await saveSite();}
+    });
+    await t.test('reserved filename sitemap URLs remain encoded while uncached HTML fails verification', async () => {
       const home = await readFile(join(root, 'dist/index.html'), 'utf8');
       const files = [['faq#old.html', '/faq%23old.html'], ['nested/questions?.html', '/nested/questions%3F.html'],
         ['space name.html', '/space%20name.html'], ['100%.html', '/100%25.html'], ['café.html', '/caf%C3%A9.html'], ['a%23b.html', '/a%2523b.html'], ['archive.html/index.html', '/archive.html/']];
@@ -224,12 +304,16 @@ test('isolated owner content, sitemap, output directory and negative controls', 
           .replaceAll(`href="${site.origin}/"`, `href="${site.origin}${route}"`));
       }
       succeeds(run(root, 'npm', ['run','build']));
-      const verified = run(root, 'npm', ['run','verify:starter']); succeeds(verified);
-      assert.match(verified.stdout, /12 HTML files/);
+      const verified = run(root, 'npm', ['run','verify:starter']);
+      assert.notEqual(verified.status, 0);
+      assert.match(verified.stderr, /emitted HTML .* is missing from the offline precache/);
       const xml = await readFile(join(root, 'dist/sitemap.xml'), 'utf8');
       const locations = [...xml.matchAll(/<loc>([^<]*)<\/loc>/g)].map((match) => match[1]);
       const routes = ['/', '/file-index.html', '/nested/', '/nested/reindex.html', '/search-index.html', ...files.map(([, route]) => route)].sort();
       assert.deepEqual(locations, routes.map((route) => site.origin + route));
+      const receipt = JSON.parse(await readFile(join(root, 'dist/offline-receipt.json')));
+      assert.ok(receipt.urls.includes('/archive.html/'));
+      assert.ok(files.filter(([file]) => !file.endsWith('/index.html')).every(([,route]) => !receipt.urls.includes(route)));
     });
   } finally { await rm(root, {recursive:true,force:true}); }
 });
