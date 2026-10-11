@@ -116,6 +116,12 @@ test('isolated owner content, sitemap, output directory and negative controls', 
       await rm(dir, {recursive:true});
     });
     const controls = [
+      ...['<!-->', '<!--->', '<!-- preceding comment --!>'].map((comment) => [
+        `comment ending ${comment} before an enabled marked form`,
+        (dir) => changeHtml(dir, (html) => html.replace('<form data-starter-contact-example', comment + '<form data-starter-contact-example')
+          .replace('</fieldset></form>', '</fieldset><button type="submit">Send live</button></form>-->')),
+        /every contact example control must be explicitly disabled/,
+      ]),
       ['empty HTML output', async (dir) => {for (const page of await htmlPages(dir)) await rm(join(dir, page.file));}, /at least one site page/],
       ['wrong canonical URL', (dir) => changeHtml(dir, (html) => html.replace(/<link rel="canonical"[^>]*>/, '<link rel="canonical" href="https://wrong.example.invalid/">')), /canonical URL/],
       ['wrong configured identity', (dir) => changeHtml(dir, (html) => html.replace(/<title>[^<]*<\/title>/, '<title>Wrong owner</title>')), /configured title suffix/],

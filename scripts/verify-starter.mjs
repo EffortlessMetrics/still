@@ -25,10 +25,17 @@ const attributeNames = (text) => new Set([...text.matchAll(/([^\t\n\f\r />][^\t\
 /** Locate static tags/declarations using value boundaries, omitting raw text. */
 function markupTags(html) {
   const tags = [];
-  const open = /<!--[\s\S]*?-->|<!|<\?|<(\/?)([A-Za-z][^\t\n\f\r />]*)/g;
+  const open = /<!--|<!|<\?|<(\/?)([A-Za-z][^\t\n\f\r />]*)/g;
   for (let match; (match = open.exec(html));) {
     if (match[0].startsWith('<!') || match[0] === '<?') {
-      if (!match[0].startsWith('<!--') || match[0] === '<!') {
+      if (match[0] === '<!--') {
+        // HTML also ends comments at an initial > or ->, and at --!>.
+        // A normal-terminator-only search could swallow a following live form.
+        const rest = html.slice(open.lastIndex);
+        const abrupt = rest.match(/^(?:>|->)/);
+        const end = /--!?>/.exec(rest);
+        open.lastIndex += abrupt?.[0].length ?? (end ? end.index + end[0].length : rest.length);
+      } else {
         const end = html.indexOf('>', open.lastIndex);
         open.lastIndex = end < 0 ? html.length : end + 1;
       }
