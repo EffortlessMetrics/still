@@ -13,6 +13,27 @@ const escapeXml = (value) => value.replace(/[&<>"']/g, (character) => ({
   '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&apos;',
 })[character]);
 
+// Read attribute names, consuming quoted values so text such as title="disabled"
+// cannot masquerade as the boolean disabled attribute.
+const attributeNames = (text) => new Set([...text.matchAll(/([^\s"'=<>`/]+)(?:\s*=\s*(?:"[^"]*"|'[^']*'|[^\s"'=<>`]+))?/g)]
+  .map((match) => match[1].toLowerCase()));
+
+function verifyContactExamples(html, file) {
+  if (!html.includes('data-starter-contact-example')) return;
+  const forms = [...html.matchAll(/<form\b((?:[^"'<>]|"[^"]*"|'[^']*')*)>[\s\S]*?<\/form\s*>/gi)]
+    .filter((match) => attributeNames(match[1]).has('data-starter-contact-example'));
+  assert.ok(forms.length > 0, `${file}: contact example must be a form`);
+  for (const [form, attributes] of forms) {
+    assert.match(form, /<fieldset\s+disabled(?:="")?>/, `${file}: contact example stays disabled`);
+    assert.match(form, /<button\s+type="button"\s+disabled(?:="")?>Sending unavailable<\/button>/);
+    assert.ok(!attributeNames(attributes).has('action'), `${file}: contact example has no backend`);
+    // Explicit control attributes avoid fieldset inheritance and its first-legend
+    // exemption, and cover controls moved outside the disabled fieldset.
+    for (const [tag, attributes] of form.matchAll(/<(?:input|button|select|textarea)\b((?:[^"'<>]|"[^"]*"|'[^']*')*)>/gi))
+      assert.ok(attributeNames(attributes).has('disabled'), `${file}: every contact example control must be explicitly disabled: ${tag}`);
+  }
+}
+
 export async function verifyStarter({ directory, site, production, root = process.cwd() }) {
   const read = (file) => readFile(join(directory, file), 'utf8');
   const origin = new URL(site.origin).origin;
@@ -32,15 +53,7 @@ export async function verifyStarter({ directory, site, production, root = proces
     const footer = html.match(/<footer\b[^>]*>([\s\S]*?)<\/footer>/)?.[1] ?? '';
     assert.ok(footer.includes(`<a href="${escapeAttribute(site.footer.href)}">${escapeText(site.footer.label)}</a>`), `${file}: configured footer`);
 
-    if (html.includes('data-starter-contact-example')) {
-      const forms = [...html.matchAll(/<form\b(?=[^>]*\bdata-starter-contact-example\b)[^>]*>[\s\S]*?<\/form>/g)];
-      assert.ok(forms.length > 0, `${file}: contact example must be a form`);
-      for (const [form] of forms) {
-        assert.match(form, /<fieldset\s+disabled(?:="")?>/, `${file}: contact example stays disabled`);
-        assert.match(form, /<button\s+type="button"\s+disabled(?:="")?>Sending unavailable<\/button>/);
-        assert.doesNotMatch(form, /<form\b[^>]*\baction=/, `${file}: contact example has no backend`);
-      }
-    }
+    verifyContactExamples(html, file);
   }
   assert.equal(await read('robots.txt'), production
     ? `User-agent: *\nAllow: /\nSitemap: ${origin}/sitemap.xml\n`

@@ -13,7 +13,7 @@ import { htmlPages } from './site-output.mjs';
 const source = fileURLToPath(new URL('../', import.meta.url));
 const production = process.env.PUBLIC_SITE_ENV === 'production';
 const environment = { ...process.env, ASTRO_TELEMETRY_DISABLED: '1' };
-const demo = '<form data-starter-contact-example><fieldset disabled><legend>Example</legend><input name="message"/><button type="button" disabled>Sending unavailable</button></fieldset></form>';
+const demo = '<form data-starter-contact-example><fieldset disabled><legend>Example</legend><input name="message" disabled/><button type="button" disabled>Sending unavailable</button></fieldset></form>';
 
 function run(root, command, args) {
   const result = spawnSync(command, args, { cwd: root, env: environment, encoding: 'utf8' });
@@ -58,7 +58,7 @@ test('isolated owner content, sitemap, output directory and negative controls', 
     await writePage(root, 'workshops.astro', '/sessions/', '<p>A renamed service.</p>');
     await rename(join(root, 'src/pages/workshops.astro'), join(root, 'src/pages/sessions.astro'));
     for (const route of ['fallback', 'private', 'redirect', '404']) await writePage(root, route + '.astro', '/' + route + '/', '<p>Fixture content.</p>');
-    await writePage(root, 'contact.astro', '/contact/', '<p><a href="mailto:owner@example.invalid">Email the owner</a></p>');
+    await writePage(root, 'contact.astro', '/contact/', '<p><a href="mailto:owner@example.invalid">Email the owner</a></p><form action="/owner-contact" method="post"><input name="message"/><button type="submit">Send to owner</button></form>');
     await mkdir(join(root, 'src/pages/stories'), {recursive: true});
     await writeFile(join(root, 'src/pages/stories/[slug].astro'), `---\nimport Site from '../../layouts/Site.astro';\nimport Page from '@effortlessmetrics/still/page';\nexport function getStaticPaths() {return ['alpha','beta'].map(slug => ({params: {slug}}));}\n---\n<Site title="Story" description="Owner story" canonicalPath={'/stories/'+Astro.params.slug+'/'}><Page><h1>Owner story</h1></Page></Site>\n`);
     await cp(join(source, 'src/pages/robots.txt.ts'), join(root, 'src/pages/robots.txt.ts'));
@@ -88,6 +88,14 @@ test('isolated owner content, sitemap, output directory and negative controls', 
       const file = join(dir, 'offline-receipt.json'); const receipt = JSON.parse(await readFile(file));
       receipt.urls = receipt.urls.filter((url) => url !== remove); await writeFile(file, JSON.stringify(receipt));
     };
+    await t.test('explicitly disabled controls remain valid outside the fieldset and quoted values stay values', async () => {
+      const dir = join(root, 'disabled-controls'); await cp(directory, dir, {recursive:true});
+      await changeHtml(dir, (html) => html
+        .replace('<form data-starter-contact-example', '<form title="action=/example > text" data-starter-contact-example')
+        .replace('</fieldset></form>', '</fieldset><INPUT title="example > text" DISABLED=""/><button disabled type="submit">Unavailable</button><select disabled><option>Example</option></select><textarea disabled></textarea></form>'));
+      assert.equal(await verifyStarter({...options, directory:dir}), 10);
+      await rm(dir, {recursive:true});
+    });
     const controls = [
       ['empty HTML output', async (dir) => {for (const page of await htmlPages(dir)) await rm(join(dir, page.file));}, /at least one site page/],
       ['wrong canonical URL', (dir) => changeHtml(dir, (html) => html.replace(/<link rel="canonical"[^>]*>/, '<link rel="canonical" href="https://wrong.example.invalid/">')), /canonical URL/],
@@ -98,6 +106,12 @@ test('isolated owner content, sitemap, output directory and negative controls', 
       ['missing sitemap route', async (dir) => {const file=join(dir,'sitemap.xml'); await writeFile(file,(await readFile(file,'utf8')).replace(/<url><loc>[^<]*<\/loc><\/url>/,''));}, /Sitemap must list exactly/],
       ['incomplete sitemap document', async (dir) => {const file=join(dir,'sitemap.xml'); await writeFile(file,(await readFile(file,'utf8')).replace('</urlset>',''));}, /complete document/],
       ['enabled marked contact example', (dir) => changeHtml(dir, (html) => html.replace(/<fieldset disabled(?:="")?>/,'<fieldset>')), /contact example stays disabled/],
+      ['enabled input outside the disabled fieldset', (dir) => changeHtml(dir, (html) => html.replace('</fieldset></form>', '</fieldset><input name="live"></form>')), /every contact example control must be explicitly disabled/],
+      ['enabled submit outside the disabled fieldset', (dir) => changeHtml(dir, (html) => html.replace('</fieldset></form>', '</fieldset><button type="submit">Send live</button></form>')), /every contact example control must be explicitly disabled/],
+      ['enabled control in the first legend', (dir) => changeHtml(dir, (html) => html.replace('<legend>', '<legend><input name="live">')), /every contact example control must be explicitly disabled/],
+      ['disabled text in an attribute value', (dir) => changeHtml(dir, (html) => html.replace('</fieldset></form>', '</fieldset><input title="a disabled > control" name="live"></form>')), /every contact example control must be explicitly disabled/],
+      ['enabled select in marked example', (dir) => changeHtml(dir, (html) => html.replace('</fieldset></form>', '</fieldset><select name="live"><option>Live</option></select></form>')), /every contact example control must be explicitly disabled/],
+      ['enabled textarea in marked example', (dir) => changeHtml(dir, (html) => html.replace('</fieldset></form>', '</fieldset><textarea name="live"></textarea></form>')), /every contact example control must be explicitly disabled/],
       ['backend on marked contact example', (dir) => changeHtml(dir, (html) => html.replace('<form data-starter-contact-example','<form action="/api/contact" data-starter-contact-example')), /contact example has no backend/],
       ['missing OFL notice', (dir) => rm(join(dir,'fonts/OFL-Sans.txt')), {code:'ENOENT'}],
       ['missing font bytes', (dir) => rm(join(dir,'fonts/IBMPlexSans.ttf')), {code:'ENOENT'}],
