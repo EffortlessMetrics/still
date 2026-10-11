@@ -5,25 +5,40 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { validateConfig } from 'astro/config';
 import { canonicalRoute, htmlPages, sitemapRoutes } from './site-output.mjs';
 
+/** Match the starter's emitted text encoding for configured consumer labels. */
 const escapeText = (value) => value.replace(/[&<>"']/g, (character) => ({
   '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
 })[character]);
+/** Match double-quoted HTML attribute encoding for configuration values. */
 const escapeAttribute = (value) => value.replaceAll('&', '&amp;').replaceAll('"', '&quot;');
+/** Encode expected sitemap locations for comparison with generated XML text. */
 const escapeXml = (value) => value.replace(/[&<>"']/g, (character) => ({
   '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&apos;',
 })[character]);
 
-// Read attribute names, consuming quoted values so text such as title="disabled"
-// cannot masquerade as the boolean disabled attribute.
+/** Read HTML attribute names while keeping quoted values from becoming names. */
 const attributeNames = (text) => new Set([...text.matchAll(/([^\s"'=<>`/]+)(?:\s*=\s*(?:"[^"]*"|'[^']*'|[^\s"'=<>`]+))?/g)]
   .map((match) => match[1].toLowerCase()));
 
+/** Validate static marked-demo markup; owner service/runtime checks stay separate. */
 function verifyContactExamples(html, file) {
-  if (!html.includes('data-starter-contact-example')) return;
-  const forms = [...html.matchAll(/<form\b((?:[^"'<>]|"[^"]*"|'[^']*')*)>[\s\S]*?<\/form\s*>/gi)]
+  // Comments and raw text are not form markup. Quoted attribute values may also
+  // contain delimiters; escape those before locating actual form boundaries.
+  const markup = html.replace(/<!--[\s\S]*?-->|<(script|style|textarea|title|xmp|iframe|noembed|noframes)\b((?:[^"'<>]|"[^"]*"|'[^']*')*)>[\s\S]*?<\/\1\s*>|<([A-Za-z][^\s/>]*)((?:[^"'<>]|"[^"]*"|'[^']*')*)>/gi,
+    (tag, rawName, rawAttributes, name, attributes) => {
+      if (tag.startsWith('<!--')) return '';
+      const tagName = rawName ?? name;
+      const safeAttributes = (rawAttributes ?? attributes).replaceAll('<', '&lt;').replaceAll('>', '&gt;');
+      return `<${tagName}${safeAttributes}>${rawName ? `</${tagName}>` : ''}`;
+    });
+  const markers = [...markup.matchAll(/<([A-Za-z][^\s/>]*)((?:[^"'<>]|"[^"]*"|'[^']*')*)>/gi)]
+    .filter((match) => attributeNames(match[2]).has('data-starter-contact-example'));
+  assert.ok(markers.every((match) => match[1].toLowerCase() === 'form'), `${file}: contact example marker must be on a form`);
+  const forms = [...markup.matchAll(/<form\b((?:[^"'<>]|"[^"]*"|'[^']*')*)>[\s\S]*?<\/form\s*>/gi)]
     .filter((match) => attributeNames(match[1]).has('data-starter-contact-example'));
-  assert.ok(forms.length > 0, `${file}: contact example must be a form`);
+  assert.equal(forms.length, markers.length, `${file}: contact example must have a complete form`);
   for (const [form, attributes] of forms) {
+    assert.ok(!attributeNames(attributes).has('id'), `${file}: contact example has no form ID for external control association`);
     assert.match(form, /<fieldset\s+disabled(?:="")?>/, `${file}: contact example stays disabled`);
     assert.match(form, /<button\s+type="button"\s+disabled(?:="")?>Sending unavailable<\/button>/);
     assert.ok(!attributeNames(attributes).has('action'), `${file}: contact example has no backend`);
@@ -34,6 +49,7 @@ function verifyContactExamples(html, file) {
   }
 }
 
+/** Validate configured consumer output, its required notices and retained demos. */
 export async function verifyStarter({ directory, site, production, root = process.cwd() }) {
   const read = (file) => readFile(join(directory, file), 'utf8');
   const origin = new URL(site.origin).origin;

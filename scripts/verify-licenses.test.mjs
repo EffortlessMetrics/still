@@ -9,6 +9,7 @@ const source = process.cwd();
 const guard = resolve(source, 'scripts/verify-licenses.mjs');
 const names = ['astromache', '@effortlessmetrics/still', '@effortlessmetrics/astro-offline'];
 
+/** Run ownership scenarios in an isolated consumer and remove it after failures. */
 async function consumerFixture(action) {
   const root = await mkdtemp(join(tmpdir(), 'still-owner-licenses-'));
   try {
@@ -55,6 +56,27 @@ test('owner notices do not replace required template or component notices', asyn
     await writeFile(mitPath, mit);
     const result = run();
     assert.equal(result.status, 0, result.stderr);
+  });
+});
+test('complete Apache terms survive formatting changes; missing patent grants fail in every notice', async () => {
+  await consumerFixture(async (root, run) => {
+    for (const path of ['licenses/template/LICENSE-APACHE', ...names.map((name) => 'node_modules/' + name + '/LICENSE-APACHE')]) {
+      const file = join(root, path);
+      const original = await readFile(file, 'utf8');
+      const incomplete = original.replace(/3\. Grant of Patent License\.[\s\S]*?(?=4\. Redistribution\.)/, '');
+      assert.notEqual(incomplete, original);
+      assert.ok(incomplete.length > 1000);
+      assert.match(incomplete, /Version 2\.0/);
+      assert.match(incomplete, /END OF TERMS AND CONDITIONS/);
+      await writeFile(file, incomplete);
+      const rejected = run();
+      assert.notEqual(rejected.status, 0, path);
+      assert.match(rejected.stderr, /complete Apache 2\.0 terms are retained/);
+      await writeFile(file, original.replace(/\s+/g, ' \r\n'));
+      const formatted = run();
+      assert.equal(formatted.status, 0, formatted.stderr);
+      await writeFile(file, original);
+    }
   });
 });
 test('active delivery and version-independent bundled/registry license fixtures', async () => {

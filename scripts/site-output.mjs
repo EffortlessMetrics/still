@@ -2,8 +2,10 @@ import { readdir, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+/** Map emitted index.html paths to the directory URLs used by the starter. */
 export const canonicalRoute = (path) => path.replace(/index\.html$/, '');
 
+/** Read all emitted HTML, preserving both 404 copies for output verification. */
 export async function htmlPages(directory) {
   const files = (await readdir(directory, { recursive: true }))
     .filter((file) => file.endsWith('.html')).sort();
@@ -17,6 +19,7 @@ export async function htmlPages(directory) {
   }));
 }
 
+/** Select unique emitted routes while honoring consumer sitemap exclusions. */
 export function sitemapRoutes(pages, site) {
   const excluded = new Set([
     '/404/',
@@ -27,11 +30,12 @@ export function sitemapRoutes(pages, site) {
     .filter((route) => !excluded.has(route)).sort();
 }
 
+/** Encode public origin/route text as XML without changing the underlying URL. */
 const escapeXml = (text) => text.replace(/[&<>"']/g, (character) => ({
   '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&apos;',
 })[character]);
 
-// Runs before offline generation so a consumer may also precache sitemap.xml.
+/** Emit sitemap bytes before offline generation so the final XML can be cached. */
 export default function sitemap(site) {
   return {
     name: 'still-starter-sitemap',
