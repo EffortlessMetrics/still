@@ -95,7 +95,7 @@ test('isolated owner content, sitemap, output directory and negative controls', 
       const dir = join(root, 'disabled-controls'); await cp(directory, dir, {recursive:true});
       await changeHtml(dir, (html) => html
         .replace('<form data-starter-contact-example', '<form title="action=/example > text" DATA-STARTER-CONTACT-EXAMPLE')
-        .replace('</fieldset></form>', '</fieldset><INPUT title="example > text" DISABLED=""/><button disabled type="submit">Unavailable</button><select disabled><option>Example</option></select><textarea disabled></textarea></form>'));
+        .replace('</fieldset></form>', '</fieldset><INPUT title="example > text" DISABLED=""/><button disabled type="submit">Unavailable</button><textarea disabled></textarea></form>'));
       assert.equal(await verifyStarter({...options, directory:dir}), 10);
       await rm(dir, {recursive:true});
     });
@@ -106,11 +106,11 @@ test('isolated owner content, sitemap, output directory and negative controls', 
       assert.equal(await verifyStarter({...options, directory:dir}), 10);
       await rm(dir, {recursive:true});
     });
-    await t.test('unmarked owner forms may retain noscript content', async () => {
+    await t.test('unmarked owner forms may retain noscript, select and template content', async () => {
       const dir = join(root, 'owner-noscript'); await cp(directory, dir, {recursive:true});
       await changeHtml(dir, (html) => {
         assert.match(html, /<form data-starter-contact-example[\s\S]*?<\/form>/);
-        return html.replace(/<form data-starter-contact-example[\s\S]*?<\/form>/, '<form action="/owner-contact"><noscript><p>Email the owner when scripting is unavailable.</p></noscript><input name="message"><button type="submit">Send</button></form>');
+        return html.replace(/<form data-starter-contact-example[\s\S]*?<\/form>/, '<form action="/owner-contact"><noscript><p>Email the owner when scripting is unavailable.</p></noscript><select name="topic"><option>Owner topic</option></select><template><input name="future"></template><input name="message"><button type="submit">Send</button></form>');
       });
       assert.equal(await verifyStarter({...options, directory:dir}), 10);
       await rm(dir, {recursive:true});
@@ -136,7 +136,7 @@ test('isolated owner content, sitemap, output directory and negative controls', 
       ['unmatched double quote in an unquoted value hiding an enabled submit', (dir) => changeHtml(dir, (html) => html.replace('</fieldset></form>', '</fieldset><input type="submit" data-x=foo"disabled></form>')), /every contact example control must be explicitly disabled/],
       ['unmatched single quote in an unquoted value hiding an enabled submit', (dir) => changeHtml(dir, (html) => html.replace('</fieldset></form>', "</fieldset><input type=\"submit\" data-x=foo'disabled></form>")), /every contact example control must be explicitly disabled/],
       ['non-ASCII space in an unquoted value hiding an enabled submit', (dir) => changeHtml(dir, (html) => html.replace('</fieldset></form>', '</fieldset><input type="submit" data-x=foo\u00a0disabled></form>')), /every contact example control must be explicitly disabled/],
-      ['enabled select in marked example', (dir) => changeHtml(dir, (html) => html.replace('</fieldset></form>', '</fieldset><select name="live"><option>Live</option></select></form>')), /every contact example control must be explicitly disabled/],
+      ['enabled select in marked example', (dir) => changeHtml(dir, (html) => html.replace('</fieldset></form>', '</fieldset><select name="live"><option>Live</option></select></form>')), /contact example cannot contain select/],
       ['enabled textarea in marked example', (dir) => changeHtml(dir, (html) => html.replace('</fieldset></form>', '</fieldset><textarea name="live"></textarea></form>')), /every contact example control must be explicitly disabled/],
       ['external controls associated with a marked form ID', (dir) => changeHtml(dir, (html) => html.replace('<form data-starter-contact-example', '<form id="starter-demo" data-starter-contact-example').replace('</form>', '</form><input form="starter-demo" name="live"><button form="starter-demo" type="submit">Send live</button>')), /contact example has no form ID/],
       ['uppercase marker with enabled controls', (dir) => changeHtml(dir, (html) => html.replaceAll('data-starter-contact-example', 'DATA-STARTER-CONTACT-EXAMPLE').replaceAll(/ disabled(?:="")?/g, '')), /contact example stays disabled/],
@@ -146,6 +146,10 @@ test('isolated owner content, sitemap, output directory and negative controls', 
       ['nested form hiding an enabled control', (dir) => changeHtml(dir, (html) => html.replace('</fieldset></form>', '</fieldset><form><input name="live"></form></form>')), /contact example cannot contain a nested form/],
       ['noscript form terminator hiding an enabled submit', (dir) => changeHtml(dir, (html) => html.replace('</fieldset></form>', '</fieldset><noscript></form></noscript><button type="submit">Send live</button></form>')), /contact example cannot contain noscript/],
       ['noscript native control in a marked example', (dir) => changeHtml(dir, (html) => html.replace('</fieldset></form>', '</fieldset><noscript><input name="live"></noscript></form>')), /contact example cannot contain noscript/],
+      ['select insertion mode hiding an enabled submit', (dir) => changeHtml(dir, (html) => html.replace('</fieldset></form>', '</fieldset><select disabled><option></form></option></select><button type="submit">Send live</button></form>')), /contact example cannot contain select/],
+      ['template insertion mode hiding an enabled submit', (dir) => changeHtml(dir, (html) => html.replace('</fieldset></form>', '</fieldset><template></form></template><button type="submit">Send live</button></form>')), /contact example cannot contain template/],
+      ['object scope hiding an enabled submit', (dir) => changeHtml(dir, (html) => html.replace('</fieldset></form>', '</fieldset><object></form></object><button type="submit">Send live</button></form>')), /contact example cannot contain object/],
+      ['table scope hiding an enabled submit', (dir) => changeHtml(dir, (html) => html.replace('</fieldset></form>', '</fieldset><table><tbody><tr><td></form></td></tr></tbody></table><button type="submit">Send live</button></form>')), /contact example cannot contain table/],
       ['example marker moved off the form', (dir) => changeHtml(dir, (html) => html.replace('<form data-starter-contact-example', '<form').replace('<fieldset disabled', '<fieldset data-starter-contact-example disabled')), /contact example marker must be on a form/],
       ['backend on marked contact example', (dir) => changeHtml(dir, (html) => html.replace('<form data-starter-contact-example','<form action="/api/contact" data-starter-contact-example')), /contact example has no backend/],
       ['missing OFL notice', (dir) => rm(join(dir,'fonts/OFL-Sans.txt')), {code:'ENOENT'}],

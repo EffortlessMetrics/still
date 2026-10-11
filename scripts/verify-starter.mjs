@@ -61,14 +61,16 @@ function markupTags(html) {
 /** Validate static marked-demo markup; owner service/runtime checks stay separate. */
 function verifyContactExamples(html, file) {
   const tags = markupTags(html);
+  const demoElements = new Set('fieldset legend label input button textarea a abbr address b blockquote br code dd del div dl dt em h1 h2 h3 h4 h5 h6 hr i img ins kbd li mark ol p pre q s samp small span strong sub sup time u ul var wbr'.split(' '));
   const markers = tags.filter((tag) => tag.attributes.has('data-starter-contact-example'));
   assert.ok(markers.every((tag) => tag.name === 'form' && !tag.closing), `${file}: contact example marker must be on a form`);
   for (const marker of markers) {
     const end = tags.find((tag) => tag.start > marker.start && tag.name === 'form' && tag.closing);
     assert.ok(end, `${file}: contact example must have a complete form`);
     const inside = tags.filter((tag) => tag.start > marker.start && tag.start < end.start && !tag.closing);
-    assert.ok(!inside.some((tag) => tag.name === 'noscript'), `${file}: contact example cannot contain noscript with scripting-dependent form boundaries`);
     assert.ok(!inside.some((tag) => tag.name === 'form'), `${file}: contact example cannot contain a nested form`);
+    const unsupported = inside.find((tag) => !demoElements.has(tag.name));
+    assert.ok(!unsupported, `${file}: contact example cannot contain ${unsupported?.name}: retained static demos use ordinary text wrappers, fieldsets, labels, inputs, buttons and textareas`);
     assert.ok(!marker.attributes.has('id'), `${file}: contact example has no form ID for external control association`);
     assert.ok(inside.some((tag) => tag.name === 'fieldset' && tag.attributes.has('disabled')), `${file}: contact example stays disabled`);
     assert.ok(inside.some((tag) => tag.name === 'button' && tag.attributes.has('disabled')), `${file}: contact example must contain an explicitly disabled button`);
