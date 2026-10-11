@@ -55,12 +55,17 @@ from the existing `sourceCommits` records.
 
 Set `STILL_OFFLINE_SOURCE_DIR` to an existing authorized producer checkout or bare
 clone to reuse it. Otherwise this command creates a disposable clone outside the
-application. No producer install, build or publication is performed.
+application and removes it on success or failure. The subshell preserves your
+checkout, environment and exit traps. No producer install, build or publication
+is performed.
 
 ```sh
+(
 if [ -z "${STILL_OFFLINE_SOURCE_DIR:-}" ]; then
-  STILL_OFFLINE_SOURCE_DIR=$(mktemp -d)
-  git clone --no-checkout https://github.com/EffortlessMetrics/astro-offline.git "$STILL_OFFLINE_SOURCE_DIR"
+  STILL_OFFLINE_TEMP_DIR=$(mktemp -d) || exit
+  trap 'rm -rf -- "$STILL_OFFLINE_TEMP_DIR"' EXIT
+  STILL_OFFLINE_SOURCE_DIR=$STILL_OFFLINE_TEMP_DIR
+  git clone --no-checkout https://github.com/EffortlessMetrics/astro-offline.git "$STILL_OFFLINE_SOURCE_DIR" || exit
 fi
 export STILL_OFFLINE_SOURCE_DIR
 node --input-type=module <<'NODE'
@@ -104,6 +109,7 @@ assert.equal(entries.length, comparison.packagedFiles);
 assert.equal(matched, comparison.byteIdenticalFiles);
 console.log(`Verified source comparison: ${comparison.commit}, ${matched} byte-identical files`);
 NODE
+)
 ```
 
 ## Replace one independently reviewed archive
