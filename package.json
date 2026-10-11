@@ -9,6 +9,7 @@
     "check": "astro check",
     "build": "astro build",
     "preview": "astro preview",
+    "verify:starter": "node scripts/verify-starter.mjs",
     "verify:licenses": "node scripts/verify-licenses.mjs",
     "test:licenses": "node --test scripts/verify-licenses.test.mjs"
   },

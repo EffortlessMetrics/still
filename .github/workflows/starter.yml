@@ -9,6 +9,11 @@ permissions:
 jobs:
   starter:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        site-environment: [preview, production]
+    env:
+      PUBLIC_SITE_ENV: ${{ matrix.site-environment }}
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
         with:
@@ -20,5 +25,6 @@ jobs:
       - run: npm ci --ignore-scripts
       - run: npm run check
       - run: npm run build
+      - run: npm run verify:starter
       - run: node scripts/verify-licenses.mjs
       - run: npm run test:licenses
