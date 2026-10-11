@@ -16,36 +16,66 @@ const escapeXml = (value) => value.replace(/[&<>"']/g, (character) => ({
   '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&apos;',
 })[character]);
 
-/** Read HTML attribute names while keeping quoted values from becoming names. */
-const attributeNames = (text) => new Set([...text.matchAll(/([^\s"'=<>`/]+)(?:\s*=\s*(?:"[^"]*"|'[^']*'|[^\s"'=<>`]+))?/g)]
+/** Read attribute names while consuming complete quoted/unquoted HTML values. */
+// Unquoted values end at ASCII whitespace or >. Parse-error punctuation such
+// as a grave accent or equals sign remains value text in the HTML tokenizer.
+const attributeNames = (text) => new Set([...text.matchAll(/([^\t\n\f\r />][^\t\n\f\r />=]*)(?:[\t\n\f\r ]*=[\t\n\f\r ]*(?:"[^"]*"|'[^']*'|[^\t\n\f\r >]+))?/g)]
   .map((match) => match[1].toLowerCase()));
+
+/** Locate static tags using HTML value boundaries, omitting comments/raw text. */
+function markupTags(html) {
+  const tags = [];
+  const open = /<!--[\s\S]*?-->|<(\/?)([A-Za-z][^\t\n\f\r />]*)/g;
+  for (let match; (match = open.exec(html));) {
+    if (match[0].startsWith('<!--')) continue;
+    let position = open.lastIndex;
+    const attributeStart = position;
+    let quote, beforeValue = false, unquotedValue = false;
+    for (; position < html.length; position++) {
+      const character = html[position];
+      if (quote) { if (character === quote) quote = undefined; continue; }
+      if (unquotedValue && /[\t\n\f\r ]/.test(character)) unquotedValue = false;
+      if (character === '>') break;
+      if (unquotedValue) continue;
+      if (beforeValue) {
+        if (/[\t\n\f\r ]/.test(character)) continue;
+        if (character === '"' || character === "'") quote = character;
+        else unquotedValue = true;
+        beforeValue = false;
+      } else if (character === '=') beforeValue = true;
+    }
+    if (position === html.length) break;
+    const name = match[2].toLowerCase();
+    tags.push({name, closing: Boolean(match[1]), start: match.index, end: position + 1,
+      attributes: attributeNames(html.slice(attributeStart, position))});
+    open.lastIndex = position + 1;
+    if (!match[1] && /^(script|style|textarea|title|xmp|iframe|noembed|noframes)$/.test(name)) {
+      const close = new RegExp(`</${name}(?=[\\t\\n\\f\\r />])`, 'gi');
+      close.lastIndex = open.lastIndex;
+      open.lastIndex = close.exec(html)?.index ?? html.length;
+    }
+  }
+  return tags;
+}
 
 /** Validate static marked-demo markup; owner service/runtime checks stay separate. */
 function verifyContactExamples(html, file) {
-  // Comments and raw text are not form markup. Quoted attribute values may also
-  // contain delimiters; escape those before locating actual form boundaries.
-  const markup = html.replace(/<!--[\s\S]*?-->|<(script|style|textarea|title|xmp|iframe|noembed|noframes)\b((?:[^"'<>]|"[^"]*"|'[^']*')*)>[\s\S]*?<\/\1\s*>|<([A-Za-z][^\s/>]*)((?:[^"'<>]|"[^"]*"|'[^']*')*)>/gi,
-    (tag, rawName, rawAttributes, name, attributes) => {
-      if (tag.startsWith('<!--')) return '';
-      const tagName = rawName ?? name;
-      const safeAttributes = (rawAttributes ?? attributes).replaceAll('<', '&lt;').replaceAll('>', '&gt;');
-      return `<${tagName}${safeAttributes}>${rawName ? `</${tagName}>` : ''}`;
-    });
-  const markers = [...markup.matchAll(/<([A-Za-z][^\s/>]*)((?:[^"'<>]|"[^"]*"|'[^']*')*)>/gi)]
-    .filter((match) => attributeNames(match[2]).has('data-starter-contact-example'));
-  assert.ok(markers.every((match) => match[1].toLowerCase() === 'form'), `${file}: contact example marker must be on a form`);
-  const forms = [...markup.matchAll(/<form\b((?:[^"'<>]|"[^"]*"|'[^']*')*)>[\s\S]*?<\/form\s*>/gi)]
-    .filter((match) => attributeNames(match[1]).has('data-starter-contact-example'));
-  assert.equal(forms.length, markers.length, `${file}: contact example must have a complete form`);
-  for (const [form, attributes] of forms) {
-    assert.ok(!attributeNames(attributes).has('id'), `${file}: contact example has no form ID for external control association`);
-    assert.match(form, /<fieldset\s+disabled(?:="")?>/, `${file}: contact example stays disabled`);
-    assert.match(form, /<button\s+type="button"\s+disabled(?:="")?>Sending unavailable<\/button>/);
-    assert.ok(!attributeNames(attributes).has('action'), `${file}: contact example has no backend`);
+  const tags = markupTags(html);
+  const markers = tags.filter((tag) => tag.attributes.has('data-starter-contact-example'));
+  assert.ok(markers.every((tag) => tag.name === 'form' && !tag.closing), `${file}: contact example marker must be on a form`);
+  for (const marker of markers) {
+    const end = tags.find((tag) => tag.start > marker.start && tag.name === 'form' && tag.closing);
+    assert.ok(end, `${file}: contact example must have a complete form`);
+    const inside = tags.filter((tag) => tag.start > marker.start && tag.start < end.start && !tag.closing);
+    assert.ok(!inside.some((tag) => tag.name === 'form'), `${file}: contact example cannot contain a nested form`);
+    assert.ok(!marker.attributes.has('id'), `${file}: contact example has no form ID for external control association`);
+    assert.ok(inside.some((tag) => tag.name === 'fieldset' && tag.attributes.has('disabled')), `${file}: contact example stays disabled`);
+    assert.ok(inside.some((tag) => tag.name === 'button' && /^<button\s+type="button"\s+disabled(?:="")?>Sending unavailable<\/button>/.test(html.slice(tag.start))));
+    assert.ok(!marker.attributes.has('action'), `${file}: contact example has no backend`);
     // Explicit control attributes avoid fieldset inheritance and its first-legend
     // exemption, and cover controls moved outside the disabled fieldset.
-    for (const [tag, attributes] of form.matchAll(/<(?:input|button|select|textarea)\b((?:[^"'<>]|"[^"]*"|'[^']*')*)>/gi))
-      assert.ok(attributeNames(attributes).has('disabled'), `${file}: every contact example control must be explicitly disabled: ${tag}`);
+    for (const tag of inside.filter((tag) => /^(input|button|select|textarea)$/.test(tag.name)))
+      assert.ok(tag.attributes.has('disabled'), `${file}: every contact example control must be explicitly disabled: ${html.slice(tag.start, tag.end)}`);
   }
 }
 
