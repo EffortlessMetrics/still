@@ -3,7 +3,7 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 /** Map emitted index.html paths to the directory URLs used by the starter. */
-export const canonicalRoute = (path) => path.replace(/index\.html$/, '');
+export const canonicalRoute = (path) => path.replace(/(^|\/)index\.html$/, '$1');
 
 /** Read all emitted HTML, preserving both 404 copies for output verification. */
 export async function htmlPages(directory) {

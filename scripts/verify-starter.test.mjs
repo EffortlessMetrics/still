@@ -173,5 +173,22 @@ test('isolated owner content, sitemap, output directory and negative controls', 
       assert.notEqual(missing.status, 0);
       assert.match(missing.stderr, /ENOENT/); assert.match(missing.stderr, /consumer-output/);
     });
+    await t.test('file output and public HTML retain basenames that only end in index.html', async () => {
+      const home = await readFile(join(root, 'dist/index.html'), 'utf8');
+      for (const [file, route] of [['search-index.html', '/search-index.html'], ['nested/reindex.html', '/nested/reindex.html'], ['nested/index.html', '/nested/']]) {
+        const destination = join(root, 'public', file);
+        await mkdir(dirname(destination), {recursive:true});
+        await writeFile(destination, home.replaceAll(`content="${site.origin}/"`, `content="${site.origin}${route}"`)
+          .replaceAll(`href="${site.origin}/"`, `href="${site.origin}${route}"`));
+      }
+      await writePage(root, 'file-index.astro', '/file-index.html', '<p>Owner file-format route.</p>');
+      await writeFile(join(root, 'astro.config.mjs'), "import config from './astro.base.mjs';\nexport default {...config, outDir:'./dist/', build:{...config.build, format:'file'}};\n");
+      succeeds(run(root, 'npm', ['run','build']));
+      const verified = run(root, 'npm', ['run','verify:starter']); succeeds(verified);
+      assert.match(verified.stdout, /5 HTML files/);
+      const xml = await readFile(join(root, 'dist/sitemap.xml'), 'utf8');
+      const locations = [...xml.matchAll(/<loc>([^<]*)<\/loc>/g)].map((match) => match[1]);
+      assert.deepEqual(locations, ['/', '/file-index.html', '/nested/', '/nested/reindex.html', '/search-index.html'].map((route) => site.origin + route));
+    });
   } finally { await rm(root, {recursive:true,force:true}); }
 });
