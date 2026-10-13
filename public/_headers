@@ -1,0 +1,11 @@
+# Selected HTML must retain the exact build bytes used for offline integrity.
+/
+  Cache-Control: public, max-age=0, must-revalidate, no-transform
+/*/
+  Cache-Control: public, max-age=0, must-revalidate, no-transform
+/*.html
+  Cache-Control: public, max-age=0, must-revalidate, no-transform
+/404
+  Cache-Control: public, max-age=0, must-revalidate, no-transform
+/reading-worker.js
+  Cache-Control: no-cache, no-store, must-revalidate
