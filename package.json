@@ -12,13 +12,13 @@
     "verify:starter": "node scripts/verify-starter.mjs",
     "verify:licenses": "node scripts/verify-licenses.mjs",
     "test:licenses": "node --test scripts/verify-licenses.test.mjs",
-    "test:starter": "node --test --test-concurrency=1 scripts/verify-starter.test.mjs"
+    "test:starter": "node --test --test-concurrency=1 scripts/verify-starter.test.mjs scripts/offline-routes.test.mjs"
   },
   "dependencies": {
     "@effortlessmetrics/still": "file:vendor/effortlessmetrics-still-0.2.1.tgz",
     "astro": "7.3.5",
     "astromache": "file:vendor/astromache-0.2.6.tgz",
-    "@effortlessmetrics/astro-offline": "file:vendor/effortlessmetrics-astro-offline-0.1.4.tgz"
+    "@effortlessmetrics/astro-offline": "file:vendor/effortlessmetrics-astro-offline-0.1.5.tgz"
   },
   "devDependencies": {
     "@astrojs/check": "0.9.10",
