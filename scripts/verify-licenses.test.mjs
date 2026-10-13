@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { cp, mkdtemp, readFile, writeFile, rm } from 'node:fs/promises';
+import { cp, mkdir, mkdtemp, readFile, writeFile, rm } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
@@ -13,8 +13,18 @@ const names = ['astromache', '@effortlessmetrics/still', '@effortlessmetrics/ast
 async function consumerFixture(action) {
   const root = await mkdtemp(join(tmpdir(), 'still-owner-licenses-'));
   try {
-    for (const file of ['package.json', 'licenses', 'vendor', 'STARTER-DELIVERY.json'])
+    for (const file of ['package.json', 'licenses'])
       await cp(join(source, file), join(root, file), { recursive: true });
+    const application = JSON.parse(await readFile(join(root, 'package.json')));
+    const bundled = names.filter((name) => application.dependencies[name]?.startsWith('file:'));
+    if (bundled.length) {
+      const receipt = JSON.parse(await readFile(join(source, 'STARTER-DELIVERY.json')));
+      await cp(join(source, 'STARTER-DELIVERY.json'), join(root, 'STARTER-DELIVERY.json'));
+      for (const name of bundled) {
+        const file = receipt.archives[name].file;
+        await cp(join(source, file), join(root, file), { recursive: true });
+      }
+    }
     for (const name of names)
       await cp(join(source, 'node_modules', name), join(root, 'node_modules', name), { recursive: true });
     const run = () => spawnSync(process.execPath, [guard], { cwd: root, encoding: 'utf8' });
@@ -35,6 +45,61 @@ test('application terms, privacy and scoped owner notices are independent of ret
       const result = run();
       assert.equal(result.status, 0, result.stderr);
     }
+  });
+});
+
+test('license regressions follow active consumer delivery after ordinary dependency updates', async (t) => {
+  await consumerFixture(async (root) => {
+    await cp(join(source, 'scripts'), join(root, 'scripts'), {recursive: true});
+    const manifest = JSON.parse(await readFile(join(root, 'package.json')));
+    const receipt = {archives: {}};
+    for (const [index, name] of names.entries()) {
+      const installed = JSON.parse(await readFile(join(root, 'node_modules', name, 'package.json')));
+      manifest.dependencies[name] = installed.version;
+      // Synthetic consistency bytes; no registry release or npm archive is claimed.
+      const file = `delivery/library-${index}.fixture`;
+      receipt.archives[name] = {file, version: installed.version};
+    }
+    // This copy's own fixture setup must work without historical delivery files.
+    await rm(join(root, 'vendor'), {recursive: true, force: true});
+    await rm(join(root, 'STARTER-DELIVERY.json'), {force: true});
+    const childEnvironment = {...process.env};
+    // A child CLI must start its own test runner rather than inherit this worker.
+    delete childEnvironment.NODE_TEST_CONTEXT;
+    const runRegressions = () => spawnSync(process.execPath, ['--test', '--test-reporter=tap',
+      '--test-name-pattern=application terms|owner notices|complete Apache|active delivery',
+      join(root, 'scripts/verify-licenses.test.mjs')], {cwd: root, env: childEnvironment, encoding: 'utf8'});
+    await t.test('exact registry pins need no bundled receipt or vendor directory', async () => {
+      await writeFile(join(root, 'package.json'), JSON.stringify(manifest));
+      const result = runRegressions();
+      assert.equal(result.status, 0, result.stdout + result.stderr);
+      assert.match(result.stdout, /# pass 4\b/);
+    });
+    await t.test('bundled pins use current receipt paths outside vendor', async () => {
+      for (const name of names) {
+        const archive = receipt.archives[name];
+        const bytes = await readFile(join(root, 'node_modules', name, 'package.json'));
+        // Preserve the exact bytes whose digest is recorded below.
+        archive.sha256 = createHash('sha256').update(bytes).digest('hex');
+        await mkdir(join(root, 'delivery'), {recursive: true});
+        await writeFile(join(root, archive.file), bytes);
+        manifest.dependencies[name] = `file:${archive.file}`;
+      }
+      await writeFile(join(root, 'package.json'), JSON.stringify(manifest));
+      await writeFile(join(root, 'STARTER-DELIVERY.json'), JSON.stringify(receipt));
+      const result = runRegressions();
+      assert.equal(result.status, 0, result.stdout + result.stderr);
+      assert.match(result.stdout, /# pass 4\b/);
+    });
+    await t.test('independent registry upgrade ignores its historical bundled receipt', async () => {
+      const name = '@effortlessmetrics/still';
+      manifest.dependencies[name] = receipt.archives[name].version;
+      await writeFile(join(root, 'package.json'), JSON.stringify(manifest));
+      await rm(join(root, receipt.archives[name].file));
+      const result = runRegressions();
+      assert.equal(result.status, 0, result.stdout + result.stderr);
+      assert.match(result.stdout, /# pass 4\b/);
+    });
   });
 });
 
