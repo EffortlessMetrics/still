@@ -1,11 +1,12 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { cp, mkdtemp, mkdir, readFile, writeFile, rm, rename } from 'node:fs/promises';
+import { cp, mkdtemp, mkdir, readFile, readdir, writeFile, rm, rename } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import { tmpdir } from 'node:os';
 import { join, dirname, relative } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { spawnSync } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
+import { createServer } from 'node:http';
 import offline from 'astromache/static-offline';
 import { site as defaults } from '../site.config.mjs';
 import { verifyStarter } from './verify-starter.mjs';
@@ -15,6 +16,18 @@ const source = fileURLToPath(new URL('../', import.meta.url));
 const production = process.env.PUBLIC_SITE_ENV === 'production';
 const environment = { ...process.env, ASTRO_TELEMETRY_DISABLED: '1' };
 const demo = '<form data-starter-contact-example><fieldset disabled><legend>Example</legend><input name="message" disabled/><button type="button" disabled>Sending unavailable</button></fieldset></form>';
+
+/** Let the loopback archive server respond while consumer commands run. */
+function runAsync(root, command, args, env = environment) {
+  return new Promise((resolve, reject) => {
+    const child = spawn(command, args, {cwd: root, env, timeout: 180_000, stdio: ['ignore', 'pipe', 'pipe']});
+    let stdout = '', stderr = '';
+    child.stdout.on('data', (bytes) => {stdout += bytes;});
+    child.stderr.on('data', (bytes) => {stderr += bytes;});
+    child.on('error', reject);
+    child.on('close', (status) => resolve({status, stdout, stderr}));
+  });
+}
 
 /** Run consumer CLI checks with the same indexing policy as the parent suite. */
 function run(root, command, args) {
@@ -33,12 +46,129 @@ async function writePage(root, file, route, content) {
   await writeFile(destination, `---\nimport Site from '${layout}';\nimport Page from '@effortlessmetrics/still/page';\n---\n<Site title="Consumer page" description="Consumer-owned example" canonicalPath=${JSON.stringify(route)}><Page><h1>Owner content</h1>${content}</Page></Site>\n`);
 }
 
+test('starter regressions follow active bundled and registry dependency delivery', async (t) => {
+  const temporary = await mkdtemp(join(tmpdir(), 'still-dependency-delivery-'));
+  const receipt = {archives: {}};
+  const archives = new Map();
+  const requests = new Set();
+  const server = createServer((request, response) => {
+    const bytes = archives.get(request.url);
+    if (request.method !== 'GET' || !bytes) {response.writeHead(404).end(); return;}
+    requests.add(request.url);
+    response.writeHead(200, {'Content-Type': 'application/octet-stream'}).end(bytes);
+  });
+  try {
+    // Recreate test-only npm archives from the installed packages, without
+    // requiring any historical receipt/vendor files. Serve solely on loopback;
+    // these archives and registry resolutions are never publication evidence.
+    const archiveDirectory = join(temporary, 'archives');
+    await mkdir(archiveDirectory);
+    for (const name of ['@effortlessmetrics/still', 'astromache', '@effortlessmetrics/astro-offline']) {
+      const installed = JSON.parse(await readFile(join(source, 'node_modules', name, 'package.json')));
+      assert.equal(installed.name, name);
+      const packed = await runAsync(join(source, 'node_modules', name), 'npm',
+        ['pack', '--ignore-scripts', '--json', '--pack-destination', archiveDirectory],
+        {...environment, npm_config_cache: join(temporary, 'packing-cache')});
+      succeeds(packed);
+      const archive = JSON.parse(packed.stdout)[0];
+      const bytes = await readFile(join(archiveDirectory, archive.filename));
+      receipt.archives[name] = {file: archive.filename, version: installed.version,
+        sha256: createHash('sha256').update(bytes).digest('hex')};
+      archives.set('/' + archive.filename, bytes);
+    }
+    await new Promise((resolve, reject) => {
+      server.once('error', reject);
+      server.listen(0, '127.0.0.1', resolve);
+    });
+    const registryOrigin = `http://127.0.0.1:${server.address().port}`;
+    for (const mode of ['registry-only', 'mixed-relocated']) {
+      await t.test(mode, async () => {
+        requests.clear();
+        const root = join(temporary, mode);
+        await mkdir(root);
+        for (const file of ['package.json', 'package-lock.json', 'licenses', 'public', 'scripts', 'tsconfig.json', 'src', 'astro.config.mjs', 'site.config.mjs'])
+          await cp(join(source, file), join(root, file), {recursive: true});
+        const manifest = JSON.parse(await readFile(join(root, 'package.json')));
+        const lock = JSON.parse(await readFile(join(root, 'package-lock.json')));
+        const activeReceipt = structuredClone(receipt);
+        const expectedRequests = [];
+        for (const [name, archive] of Object.entries(receipt.archives)) {
+          const installed = lock.packages['node_modules/' + name];
+          const bytes = archives.get('/' + archive.file.split('/').at(-1));
+          assert.equal(installed.version, archive.version);
+          installed.integrity = 'sha512-' + createHash('sha512').update(bytes).digest('base64');
+          if (mode === 'mixed-relocated' && name !== '@effortlessmetrics/still') {
+            const file = 'delivery/' + archive.file.split('/').at(-1);
+            await mkdir(join(root, 'delivery'), {recursive: true});
+            await writeFile(join(root, file), bytes);
+            manifest.dependencies[name] = `file:${file}`;
+            installed.resolved = `file:${file}`;
+            activeReceipt.archives[name].file = file;
+          } else {
+            const path = '/' + archive.file.split('/').at(-1);
+            manifest.dependencies[name] = archive.version;
+            installed.resolved = registryOrigin + path;
+            expectedRequests.push(path);
+          }
+          lock.packages[''].dependencies[name] = manifest.dependencies[name];
+        }
+        if (mode === 'mixed-relocated')
+          await writeFile(join(root, 'STARTER-DELIVERY.json'), JSON.stringify(activeReceipt));
+        await writeFile(join(root, 'package.json'), JSON.stringify(manifest));
+        await writeFile(join(root, 'package-lock.json'), JSON.stringify(lock));
+        const lockBefore = await readFile(join(root, 'package-lock.json'));
+        // Separate cache forces these candidate archives to be fetched from the
+        // loopback endpoint even if another qualification already cached them.
+        const env = {...environment, npm_config_cache: join(temporary, mode + '-cache')};
+        succeeds(await runAsync(root, 'npm', ['ci', '--ignore-scripts', '--no-audit', '--no-fund'], env));
+        assert.deepEqual(await readFile(join(root, 'package-lock.json')), lockBefore, 'Frozen install must not rewrite the lock');
+        assert.ok(expectedRequests.every((path) => requests.has(path)), 'Exact registry archives must actually be served');
+        for (const name of Object.keys(receipt.archives)) {
+          const original = join(source, 'node_modules', name);
+          const installed = join(root, 'node_modules', name);
+          const files = (await readdir(original, {recursive: true, withFileTypes: true})).filter((entry) => entry.isFile());
+          const actual = (await readdir(installed, {recursive: true, withFileTypes: true})).filter((entry) => entry.isFile());
+          const path = (entry, directory) => relative(directory, join(entry.parentPath, entry.name));
+          assert.deepEqual(actual.map((entry) => path(entry, installed)).sort(), files.map((entry) => path(entry, original)).sort());
+          for (const entry of files) {
+            const file = path(entry, original);
+            assert.deepEqual(await readFile(join(installed, file)), await readFile(join(original, file)), `${name}/${file}: installed candidate bytes`);
+          }
+        }
+        for (const command of ['verify:licenses', 'check', 'build', 'verify:starter'])
+          succeeds(await runAsync(root, 'npm', ['run', command], env));
+        const childEnvironment = {...env};
+        delete childEnvironment.NODE_TEST_CONTEXT;
+        const result = await runAsync(root, process.execPath, ['--test', '--test-reporter=tap',
+          '--test-name-pattern=isolated owner content', 'scripts/verify-starter.test.mjs'], childEnvironment);
+        succeeds(result);
+        assert.ok(Number(result.stdout.match(/# pass (\d+)/)?.[1]) > 1, 'The nested starter suite must execute its subtests');
+        assert.match(result.stdout, /# fail 0\b/);
+        assert.match(result.stdout, /# skipped 0\b/);
+        assert.deepEqual(await readFile(join(root, 'package-lock.json')), lockBefore);
+      });
+    }
+  } finally {
+    await new Promise((resolve) => server.close(resolve));
+    await rm(temporary, {recursive: true, force: true});
+  }
+});
+
 test('isolated owner content, sitemap, output directory and negative controls', async (t) => {
   const root = await mkdtemp(join(tmpdir(), 'still-first-use-'));
   try {
     // Content fixtures are independent of the consumer's editable sample pages.
-    for (const file of ['package.json', 'package-lock.json', 'vendor', 'licenses', 'STARTER-DELIVERY.json', 'public', 'scripts', 'tsconfig.json', 'src/layouts', 'src/styles'])
+    for (const file of ['package.json', 'package-lock.json', 'licenses', 'public', 'scripts', 'tsconfig.json', 'src/layouts', 'src/styles'])
       await cp(join(source, file), join(root, file), { recursive: true });
+    const application = JSON.parse(await readFile(join(root, 'package.json')));
+    const bundled = Object.values(application.dependencies).filter((pin) => pin.startsWith('file:'));
+    if (bundled.length) {
+      await cp(join(source, 'STARTER-DELIVERY.json'), join(root, 'STARTER-DELIVERY.json'));
+      for (const pin of bundled) {
+        const file = pin.slice('file:'.length);
+        await cp(join(source, file), join(root, file), {recursive: true});
+      }
+    }
     await cp(join(source, 'astro.config.mjs'), join(root, 'astro.base.mjs'));
     const outputConfig = (outDir) => writeFile(join(root, 'astro.config.mjs'), `import config from './astro.base.mjs';\nexport default {...config, outDir: ${JSON.stringify(outDir)}};\n`);
     await outputConfig('./dist/');
