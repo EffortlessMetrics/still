@@ -1,6 +1,6 @@
 # Still service-site starter
 
-A neutral, standalone default with verified offline caching and connection-aware native intent prefetch enabled. Shared components keep their established npm names/imports; canonical static precache setup uses the unpublished astromache 0.2.6 core preset. Cache integrity and lifecycle remain owned by offline 0.1.4.
+A neutral, standalone default with verified offline caching and connection-aware native intent prefetch enabled. Shared components keep their established npm names/imports; canonical static precache setup uses the unpublished astromache 0.2.6 core preset. Cache integrity and lifecycle remain owned by offline 0.1.5. The exact shared vendored candidate also serves explicit `/index.html` navigations from verified directory pages; the prior archive is retained for rollback.
 
 Use Node 24.19.x. Run `npm ci --ignore-scripts`, `npm run check`, `npm run build`, `npm run verify:starter`, `npm run verify:licenses`, `npm run test:licenses` and `npm run test:starter`. Use `npm run dev` for local editing or `npm run preview` to inspect the static build. Exact active archive hashes are in STARTER-DELIVERY.json. These expanded candidates are not yet registry releases.
 
