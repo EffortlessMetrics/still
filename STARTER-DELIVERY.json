@@ -12,9 +12,9 @@
       "version": "0.2.6"
     },
     "@effortlessmetrics/astro-offline": {
-      "file": "vendor/effortlessmetrics-astro-offline-0.1.4.tgz",
-      "sha256": "55d880bfa3fc9dcd650df94a1354040db899130edfb471d8caf45b6fa96e257e",
-      "version": "0.1.4"
+      "file": "vendor/effortlessmetrics-astro-offline-0.1.5.tgz",
+      "version": "0.1.5",
+      "sha256": "e8cb8779d076896e437fb309a5c3ce2d15d5620a1e1d0508d614ff6f09d17a06"
     }
   },
   "sourceCommits": {
@@ -24,14 +24,16 @@
   "sourceComparisons": {
     "@effortlessmetrics/astro-offline": {
       "repository": "https://github.com/EffortlessMetrics/astro-offline.git",
-      "commit": "ea10e41d5ad78906a9d66ff0972b9241adbadc6f",
-      "tree": "d62b532c777a1948b84f0f5d820c30db9a247aa8",
-      "archiveSha256": "55d880bfa3fc9dcd650df94a1354040db899130edfb471d8caf45b6fa96e257e",
+      "commit": "26ad83656f19a73e84d294e87672cb949bf614e3",
+      "tree": "49876b4afd30659fff9367e14654204bb3690b24",
+      "archiveSha256": "e8cb8779d076896e437fb309a5c3ce2d15d5620a1e1d0508d614ff6f09d17a06",
       "packagedFiles": 12,
       "byteIdenticalFiles": 11,
-      "omittedManifestFields": { "packageManager": "pnpm@10.28.0" },
+      "omittedManifestFields": {
+        "packageManager": "pnpm@10.28.0"
+      },
       "manifestFormattingDiffers": true,
-      "scope": "Verified archive-to-source comparison baseline, not an attestation of the original packing commit. Eleven non-manifest files are byte-identical; parsed manifests match after omitting the recorded field."
+      "scope": "Fresh shared pnpm 10.28.0 pack from this exact producer source; eleven non-manifest files are byte-identical and parsed manifests match after omitting the recorded field. Manifest key order/formatting differs. Producer PR4 independently reviewed this exact digest; consumer verifies its own installed and delivered bytes."
     }
   },
   "offline": true,
@@ -39,6 +41,6 @@
   "applicationLicense": "UNLICENSED",
   "templateCodeLicense": "MIT OR Apache-2.0",
   "upstreamNotices": "licenses/template; replacement content remains owner-controlled",
-  "localBrowserAcceptance": "PASS exact final archive: navigation/prefetch/offline/reconnect/integrity/cache-byte checks",
+  "localBrowserAcceptance": "PASS exact 0.1.5 archive: actual preview/production index aliases, three offline/reconnect cycles with exact page bytes, query/API controls, immutable cache, fonts/prefetch/theme/keyboard/responsive acceptance; system Chromium 154.0.8037.57",
   "hostedAcceptance": "NOT RUN"
 }
