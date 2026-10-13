@@ -45,13 +45,15 @@ NODE
 ## Check the recorded producer source
 
 The receipt records a comparison baseline at offline producer commit
-`ea10e41d5ad78906a9d66ff0972b9241adbadc6f`, tree
-`d62b532c777a1948b84f0f5d820c30db9a247aa8`. Eleven non-manifest files match
+`26ad83656f19a73e84d294e87672cb949bf614e3`, tree
+`49876b4afd30659fff9367e14654204bb3690b24`. Eleven non-manifest files match
 exactly. The archive's parsed manifest matches after omitting the source's
 `packageManager: pnpm@10.28.0`; key order and final newline also differ.
-PR2's head has the same tree, so this does **not** prove which commit originally
-packed the archive. `sourceComparisons` deliberately distinguishes this evidence
-from the existing `sourceCommits` records.
+This delivery was freshly packed from that exact candidate source with pnpm 10.28.0;
+its digest identifies the shared producer delivery qualified in astro-offline PR4.
+The prior archive remains at `vendor/effortlessmetrics-astro-offline-0.1.4.tgz`
+for rollback. The new unpublished patch candidate is 0.1.5; the prior 0.1.4 bytes remain unchanged;
+no registry version has been replaced.
 
 Set `STILL_OFFLINE_SOURCE_DIR` to an existing authorized producer checkout or bare
 clone to reuse it. Otherwise this command creates a disposable clone outside the
@@ -120,8 +122,8 @@ reviewed value before installing; obtaining that value from the same unverified
 download is not independent review. This runnable example retains the current pin:
 
 ```sh
-export STILL_UPGRADE_ARCHIVE=vendor/effortlessmetrics-astro-offline-0.1.4.tgz
-export STILL_UPGRADE_SHA256=55d880bfa3fc9dcd650df94a1354040db899130edfb471d8caf45b6fa96e257e
+export STILL_UPGRADE_ARCHIVE=vendor/effortlessmetrics-astro-offline-0.1.5.tgz
+export STILL_UPGRADE_SHA256=e8cb8779d076896e437fb309a5c3ce2d15d5620a1e1d0508d614ff6f09d17a06
 node --input-type=module <<'NODE'
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
