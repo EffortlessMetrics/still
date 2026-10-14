@@ -52,6 +52,6 @@
   "applicationLicense": "UNLICENSED",
   "templateCodeLicense": "MIT OR Apache-2.0",
   "upstreamNotices": "licenses/template; replacement content remains owner-controlled",
-  "localBrowserAcceptance": "NOT RUN after Still 0.2.2 adoption",
+  "localBrowserAcceptance": "PASS Still 0.2.2 exact CI archive de5bbe16d179d3676e359d2e3dca01b499375720cac22fa84d370da4bffa2687: actual preview/production divider matrices, opt-in removal/card restoration, three offline/reconnect cycles each with exact HTML/font bytes and index-document aliases, query/API guards, theme persistence and keyboard focus; Chromium 154.0.8037.57; lifecycle uses simulated favorable 4g/10Mbps, adverse 3g/saveData registration guard also checked. Hosted acceptance NOT RUN.",
   "hostedAcceptance": "NOT RUN"
 }
