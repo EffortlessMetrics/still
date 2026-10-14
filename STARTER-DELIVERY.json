@@ -2,9 +2,9 @@
   "scope": "Unpublished starter delivery candidate; exact vendored archives",
   "archives": {
     "@effortlessmetrics/still": {
-      "file": "vendor/effortlessmetrics-still-0.2.1.tgz",
-      "sha256": "3dde922a9f0b0e7ad1f41f8c60b187901cbdbc3601b13813dad56b508c5dfd84",
-      "version": "0.2.1"
+      "file": "vendor/effortlessmetrics-still-0.2.2.tgz",
+      "sha256": "de5bbe16d179d3676e359d2e3dca01b499375720cac22fa84d370da4bffa2687",
+      "version": "0.2.2"
     },
     "astromache": {
       "file": "vendor/astromache-0.2.6.tgz",
@@ -19,7 +19,7 @@
   },
   "sourceCommits": {
     "astromache-core": "321252a11fb487a58647487875257a0f95537bf0",
-    "still-core": "adf78bd6e9798bfb02e2692a6105f7c7c1c8c6d5"
+    "still-core": "4a247e76837dd700ac1bb953fb02c9f3c51b7907"
   },
   "sourceComparisons": {
     "@effortlessmetrics/astro-offline": {
@@ -34,6 +34,17 @@
       },
       "manifestFormattingDiffers": true,
       "scope": "Fresh shared pnpm 10.28.0 pack from this exact producer source; eleven non-manifest files are byte-identical and parsed manifests match after omitting the recorded field. Manifest key order/formatting differs. Producer PR4 independently reviewed this exact digest; consumer verifies its own installed and delivered bytes."
+    },
+    "@effortlessmetrics/still": {
+      "repository": "https://github.com/EffortlessMetrics/still-core.git",
+      "commit": "4a247e76837dd700ac1bb953fb02c9f3c51b7907",
+      "tree": "6dbd2f2ce2b37b09d130dc1a2f36ccf8baba9e7a",
+      "archiveSha256": "de5bbe16d179d3676e359d2e3dca01b499375720cac22fa84d370da4bffa2687",
+      "packagedFiles": 19,
+      "byteIdenticalFiles": 18,
+      "omittedManifestFields": {},
+      "manifestFormattingDiffers": true,
+      "scope": "Reconstructed from the exact reviewed/merged source with package-file modes 0644 and npm 11.9.0; bytes match independently qualified core PR12 CI archive SHA256 and size exactly. Eighteen non-manifest files are byte-identical and parsed manifests match. Artifact ZIP transfer was not retried or claimed inspected."
     }
   },
   "offline": true,
@@ -41,6 +52,6 @@
   "applicationLicense": "UNLICENSED",
   "templateCodeLicense": "MIT OR Apache-2.0",
   "upstreamNotices": "licenses/template; replacement content remains owner-controlled",
-  "localBrowserAcceptance": "PASS exact 0.1.5 archive: actual preview/production index aliases, three offline/reconnect cycles with exact page bytes, query/API controls, immutable cache, fonts/prefetch/theme/keyboard/responsive acceptance; system Chromium 154.0.8037.57",
+  "localBrowserAcceptance": "PASS Still 0.2.2 exact CI archive de5bbe16d179d3676e359d2e3dca01b499375720cac22fa84d370da4bffa2687: actual preview/production divider matrices, opt-in removal/card restoration, three offline/reconnect cycles each with exact HTML/font bytes and index-document aliases, query/API guards, theme persistence and keyboard focus; Chromium 154.0.8037.57; lifecycle uses simulated favorable 4g/10Mbps, adverse 3g/saveData registration guard also checked. Hosted acceptance NOT RUN.",
   "hostedAcceptance": "NOT RUN"
 }
