@@ -4,7 +4,7 @@ import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { validateConfig } from 'astro/config';
-import { canonicalRoute, htmlPages, sitemapRoutes } from './site-output.mjs';
+import { assertRootBase, canonicalRoute, htmlPages, sitemapRoutes } from './site-output.mjs';
 
 /** Match the starter's emitted text encoding for configured consumer labels. */
 const escapeText = (value) => value.replace(/[&<>"']/g, (character) => ({
@@ -98,7 +98,8 @@ function verifyContactExamples(html, file) {
 }
 
 /** Validate configured consumer output, its required notices and retained demos. */
-export async function verifyStarter({ directory, site, production, root = process.cwd() }) {
+export async function verifyStarter({ directory, site, production, root = process.cwd(), base = '/' }) {
+  assertRootBase(base);
   const read = (file) => readFile(join(directory, file), 'utf8');
   const origin = new URL(site.origin).origin;
   const robots = production ? 'index,follow' : 'noindex,nofollow';
@@ -218,6 +219,6 @@ if (process.argv[1] && pathToFileURL(process.argv[1]).href === import.meta.url) 
   const config = await validateConfig(rawConfig, root, 'build');
   const {site} = await import(pathToFileURL(join(root, 'site.config.mjs')));
   const production = process.env.PUBLIC_SITE_ENV === 'production';
-  const count = await verifyStarter({directory: fileURLToPath(config.outDir), site, production, root});
+  const count = await verifyStarter({directory: fileURLToPath(config.outDir), site, production, root, base: config.base});
   console.log(`Starter output passes: ${count} HTML files, ${production ? 'production' : 'preview'} indexing, configured identity/links/sitemap, marked contact examples, offline page digests/fallback/fonts and notices.`);
 }

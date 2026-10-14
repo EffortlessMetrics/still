@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { cp, mkdtemp, mkdir, readFile, readdir, writeFile, rm, rename } from 'node:fs/promises';
+import { cp, mkdtemp, mkdir, readFile, readdir, writeFile, rm, rename, stat } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import { tmpdir } from 'node:os';
 import { join, dirname, relative } from 'node:path';
@@ -213,6 +213,37 @@ test('isolated owner content, sitemap, output directory and negative controls', 
       const worker = await readFile(join(directory, site.offline.workerFile), 'utf8');
       const digests = JSON.parse(worker.match(/const DIGESTS=(\{[^\n]+\});/)[1]);
       assert.equal(digests['/sitemap.xml'], createHash('sha256').update(xml).digest('hex'));
+    });
+
+    await t.test('non-root consumer configuration cannot build or certify retained root output', async () => {
+      const configFile = join(root, 'astro.config.mjs');
+      const configBefore = await readFile(configFile);
+      const snapshot = async () => {
+        const files = [];
+        for (const file of (await readdir(directory, {recursive: true})).sort())
+          if ((await stat(join(directory, file))).isFile())
+            files.push([file, createHash('sha256').update(await readFile(join(directory, file))).digest('hex')]);
+        return files;
+      };
+      const outputBefore = await snapshot();
+      try {
+        for (const base of ['/docs', '/docs/', '/nested/docs/']) {
+          await writeFile(configFile, `import config from './astro.base.mjs';\nexport default {...config, base: ${JSON.stringify(base)}};\n`);
+          const built = run(root, 'npm', ['run', 'build']);
+          assert.notEqual(built.status, 0, 'Unsupported deployment must fail configuration');
+          assert.match(built.stdout + built.stderr, /Still starter requires Astro base "\/"/);
+          const verified = run(root, 'npm', ['run', 'verify:starter']);
+          assert.notEqual(verified.status, 0, 'Existing root output cannot qualify a non-root consumer');
+          assert.match(verified.stdout + verified.stderr, /Still starter requires Astro base "\/"/);
+          await assert.rejects(verifyStarter({...options, base}), /non-root base .* is unsupported/);
+          assert.deepEqual(await snapshot(), outputBefore, 'Rejection must precede output generation');
+        }
+      } finally {
+        await writeFile(configFile, configBefore);
+      }
+      succeeds(run(root, 'npm', ['run', 'build']));
+      succeeds(run(root, 'npm', ['run', 'verify:starter']));
+      assert.deepEqual(await snapshot(), outputBefore, 'Restored root build must preserve every emitted byte');
     });
 
     const changeHtml = async (dir, update) => {
