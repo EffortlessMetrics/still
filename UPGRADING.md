@@ -6,6 +6,64 @@ The examples audit the current offline candidate without changing its version.
 Use a separately reviewed archive, digest and source comparison for a real upgrade.
 Do not infer a source revision from a package version.
 
+## Keep library updates separate from starter tooling migrations
+
+The archive replacement below updates one library in your existing application.
+It does not update editable starter files or require copying the latest template.
+Review that library's compatibility notes for required API/config changes; retain
+your routes, prose, layout adapters, styles, public assets, application terms and
+host/offline policy. Still 0.2.1 to 0.2.2 and offline 0.1.4 to 0.1.5 need no config
+migration; the divider class is optional. Rebuild and qualify changed output.
+
+Adopting newer **starter build/verification tooling** is a separate, optional
+source migration. Earlier standalone copies (for example commit `e2261fb`) used
+`src/pages/sitemap.xml.ts` with four hardcoded sample routes. Today's
+`verify:starter` checks every eligible emitted route. Updating the verifier alone
+can therefore build successfully but fail sitemap verification after you add your
+own pages. Do not restore sample pages or overwrite owner files to satisfy it.
+
+When adopting this tooling, compare the old and new starter source in a disposable
+copy of your application and merge the required changes:
+
+1. Bring in the reviewed `scripts/site-output.mjs` alongside the verifier. In your
+   existing `astro.config.mjs`, add this import:
+
+   ```js
+   import sitemap from './scripts/site-output.mjs';
+   ```
+
+   Insert `sitemap(site)` immediately before `offline(site.offline)` in the existing
+   `integrations` array. Preserve your other integrations, `site`, `outDir`,
+   prefetch settings and all other Astro options. Any integration that changes
+   emitted HTML/assets must finish before sitemap/offline generation. Offline
+   must hash the final output, including the sitemap if your globs select XML.
+2. Retire the old hardcoded `src/pages/sitemap.xml.ts` after reviewing it. If it
+   contains custom logic, port that logic deliberately rather than deleting it
+   blindly. Keep a single sitemap producer. Preserve all other routes and content.
+3. Merge `site.sitemapExcludedPaths` into your existing `site.config.mjs`; retain
+   owner exclusions and add the canonical route of your informational offline
+   fallback if you want it omitted (the default is `/offline/`). Do not replace
+   your identity, navigation, footer, theme key, cache prefix, worker filename,
+   scope, exclusions, globs or resource/byte budgets with starter defaults.
+   Sitemap exclusions do not waive offline coverage; the fallback must remain
+   precached. Earlier copies without `name`, `themeStorageKey`, `navigation` or
+   `footer` must first move their existing layout values into those config fields
+   and wire their layout adapter to them, preserving the existing values.
+
+Snapshot owner files before the migration and compare their bytes afterward;
+review only the intended config/tooling changes and the retired sitemap producer.
+Keep the old source, archives, receipt, manifest and lockfile for rollback. Reset
+acceptance claims for changed output, then run the full preview/production checks
+listed in README. Library pins and application license choices stay independent.
+
+`npm run test:upgrade` is a focused disposable-consumer control for this historical
+migration, using the retained Still 0.2.1 and accepted 0.2.2 archives in this checkout.
+It demonstrates an independent version update and the legacy config failure,
+verifies final sitemap/worker
+digests and preserved owner files/policy, and rejects reversed integration order.
+It uses the installed dependency toolchain after a frozen install; it does not
+replace checks on your application's actual adapters, host or browser lifecycle.
+
 ## Check the delivered bytes
 
 The following checks the receipt's SHA256, the lockfile's SHA512 and every regular
