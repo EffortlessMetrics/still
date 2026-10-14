@@ -2,9 +2,10 @@
   "scope": "Neutral public starter only; existing branded Git history retained",
   "frozenSourceMapSha256": "18c230ffc6a9d8c8bb40d5c5cf274331aa5b0c96c6262778f6134dbfb1ba30f0",
   "privateSourceImported": false,
-  "deniedStillPR4Included": false,
-  "localBrowserQualification": "PASS exact relocated archive; final assembled browser acceptance",
+  "localBrowserQualification": "NOT RUN after Still 0.2.2 adoption",
   "hostedAcceptance": "NOT RUN",
   "licenseSeparation": "Application UNLICENSED; original MIT/Apache notices scoped, no blanket site/content grant",
-  "reviewRepairs": "TTF offline precache, fallback skip-link focus, registration follows editable worker configuration, independent vendor license assertions"
+  "reviewRepairs": "TTF offline precache, fallback skip-link focus, registration follows editable worker configuration, independent vendor license assertions",
+  "stillPR4Included": true,
+  "stillPR4Scope": "Standalone example pages consume independently qualified Still 0.2.2; producer infrastructure remains excluded"
 }
