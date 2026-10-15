@@ -1,0 +1,12 @@
+Independent review: no blocking findings.
+
+Reviewed final probe and completed browser run for production candidate 278fc3cf05777d30c552d2b771e408931bf092f6, tree 71c1c34c058fa91a99535af54053fde1e7e4400e. The probe asserts tracked production inputs unchanged against that candidate. Git HEAD/tree independently matched at review.
+
+The final run establishes same-origin A -> B -> A with two old clients holding each installed update waiting, previous corpus served offline while waiting, and natural activation only after both old clients close. No worker source changes, forced takeover, unregister, or cache clearing occur. Distinct HTML/worker hashes, exact offline known/fallback/B-only bytes, owned cache keys, foreign sentinel content and actual worker revision/ownState corroborate lifecycle identity. Final rollback retains only A owned cache and foreign sentinel, without B-only entry. Six HTTP 503 navigations return exact fixture status/body through the worker.
+
+active() is adequate: workerFor selects the distinct expected global REVISION, then active() now requires that selected worker's own self.serviceWorker.state be activated, registration.active activated and no waiting worker. Snapshot ownState/revisions and phase-distinct offline response bytes independently support the conclusion.
+
+Evidence limits: Node24.19.0 and local headless Chromium154.0.8037.57 only; explicit initial registration is used. Production connection-aware/idle registration eligibility is not qualified by this final run. Earlier unbounded-ready stall and dependency-symlink build failure are harness/provisioning observations, not worker findings. No hosted deployment, browser matrix or stalled-transport timeout test is claimed.
+
+Log SHA256: 167a0aa6e3298bf90c75b2cc23e608d16fef14e9cbe530cba777dde5698d2a81
+Probe SHA256: 67dc7c3ee18a950f99564069a23e22207a145d99e8daf49122d9502a6e2ea192

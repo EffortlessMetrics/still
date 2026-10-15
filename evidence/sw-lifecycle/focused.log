@@ -1,0 +1,24 @@
+✔ installed offline candidate resolves explicit index documents from directory-only corpus (32.175817ms)
+✔ installed offline precache route isolates interrupted navigation and repeated recovery (5.04922ms)
+✔ installed offline fallback route isolates interrupted navigation and repeated recovery (3.095989ms)
+✔ installed offline candidate keeps a distinct exact file before its directory alias (1.740209ms)
+✔ installed offline aliases retain method, origin, query, exclusion and resource guards (1.516472ms)
+▶ real bundled deliveries bind active manifest, lock, receipt and installed bytes
+  ✔ legacy documented audit accepts a stale active pin; active verifier rejects it (114.392967ms)
+  ✔ root pin (8.23897ms)
+  ✔ resolved path (7.022179ms)
+  ✔ lock version (5.014497ms)
+  ✔ lock digest (6.33206ms)
+  ✔ receipt digest (3.626127ms)
+  ✔ installed runtime bytes (35.677556ms)
+  ✔ archive corruption (4.099911ms)
+  ✔ real older archive upgraded through npm and frozen installation (6546.186715ms)
+✔ real bundled deliveries bind active manifest, lock, receipt and installed bytes (7646.76735ms)
+ℹ tests 15
+ℹ suites 0
+ℹ pass 15
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 7725.017501

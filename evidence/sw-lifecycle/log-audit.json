@@ -1,0 +1,28 @@
+{
+  "candidate": {
+    "event": "candidate",
+    "commit": "278fc3cf05777d30c552d2b771e408931bf092f6",
+    "tree": "71c1c34c058fa91a99535af54053fde1e7e4400e"
+  },
+  "logSha256": "167a0aa6e3298bf90c75b2cc23e608d16fef14e9cbe530cba777dde5698d2a81",
+  "probeSha256": "67dc7c3ee18a950f99564069a23e22207a145d99e8daf49122d9502a6e2ea192",
+  "runtime": {
+    "event": "runtime",
+    "node": "v24.19.0",
+    "browser": "154.0.8037.57",
+    "origin": "http://127.0.0.1:44223",
+    "candidate": "278fc3cf05777d30c552d2b771e408931bf092f6",
+    "productionCandidate": "278fc3cf05777d30c552d2b771e408931bf092f6"
+  },
+  "responses": 27,
+  "http503Responses": 6,
+  "ownedCacheFinal": [
+    "foreign-sentinel",
+    "still-starter-reading-10980dc4cb57450eb204"
+  ],
+  "revisions": {
+    "A": "10980dc4cb57450eb204",
+    "B": "999bfcfd661750bca238"
+  },
+  "status": "independent final log assertions passed"
+}

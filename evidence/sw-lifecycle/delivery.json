@@ -1,0 +1,20 @@
+[
+  {
+    "name": "@effortlessmetrics/still",
+    "version": "0.2.2",
+    "sha256": "de5bbe16d179d3676e359d2e3dca01b499375720cac22fa84d370da4bffa2687",
+    "files": 19
+  },
+  {
+    "name": "astromache",
+    "version": "0.2.6",
+    "sha256": "e91c7f64add6553dc3e3be602803efa3ff5d3e6a11936258e2d137e148441f25",
+    "files": 31
+  },
+  {
+    "name": "@effortlessmetrics/astro-offline",
+    "version": "0.1.5",
+    "sha256": "e8cb8779d076896e437fb309a5c3ce2d15d5620a1e1d0508d614ff6f09d17a06",
+    "files": 12
+  }
+]
