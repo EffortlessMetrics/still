@@ -1,0 +1,15 @@
+Independent reviewer: /root/review_failed_precache, 2026-10-15 UTC.
+Final completed-run independent audit passed, no blocking findings.
+Read final probe and H:\Temp\still-failed-precache-VPYJfv\evidence.json.
+Failure partial snapshot has new /a-ok.txt = new verified first; then redundant,
+new cache absent, old three entries and foreign sentinel unchanged, offline old.
+Successful control holds old/new/foreign while installed; activated snapshot has
+only new/foreign with unchanged foreign body; offline new.
+New-worker REVISION observation and cleanup before replacement client address
+prior harness activation race. Verified HEAD 11cd1a04c87add5f9787f5c079a1efb13ed3b8d6,
+tree 26dd2e7c35d52dcdfef166e39c243c574372373e, empty scoped production diff,
+worker and generated worker hashes match JSON.
+Limits: Chrome155, Node24.19, Workbox7.4.1, three-file localhost cache-first fixture;
+digest failure after one verified entry, not process interruption, transport/HTTP
+failure, full site or browser matrix. No runtime defect; no source changes warranted.
+Reviewer inspected artifacts and recalculated identities; did not rerun Chromium.

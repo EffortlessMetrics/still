@@ -1,0 +1,324 @@
+{
+  "verified": "11cd1a04c87add5f9787f5c079a1efb13ed3b8d6",
+  "checkout": "11cd1a04c87add5f9787f5c079a1efb13ed3b8d6",
+  "tree": "26dd2e7c35d52dcdfef166e39c243c574372373e",
+  "observedAt": "2026-10-15T05:23:03.834Z",
+  "browser": "155.0.8059.40",
+  "runtime": "v24.19.0",
+  "workerSha256": "6f96bfccdc437421ce15748c5a8cf30a9fa0386eafd5d5f200742aa29f06aaec",
+  "generatedWorkerSha256": {
+    "old": "0fb5aecfa94642323e8f1831a9ab557392bc8d5d56c31b1b3a1a6a74cea561ae",
+    "new": "20721d6bb312ec983984f34dba460789477d7a43e084a73adf501ae531af3c89"
+  },
+  "receipts": {
+    "old": {
+      "revision": "3200090d3f3ca9303092",
+      "resources": 3,
+      "files": 3,
+      "bytes": 72,
+      "urls": [
+        "/a-ok.txt",
+        "/asset.txt",
+        "/index.html"
+      ],
+      "largestHtmlBytes": 45,
+      "workbox": "7.4.1"
+    },
+    "new": {
+      "revision": "0ace9563da5f6597b6db",
+      "resources": 3,
+      "files": 3,
+      "bytes": 72,
+      "urls": [
+        "/a-ok.txt",
+        "/asset.txt",
+        "/index.html"
+      ],
+      "largestHtmlBytes": 45,
+      "workbox": "7.4.1"
+    }
+  },
+  "results": [
+    {
+      "case": "partially populated failed digest before activation",
+      "state": "redundant",
+      "before": {
+        "task33-reading-3200090d3f3ca9303092": [
+          [
+            "http://127.0.0.1:64034/a-ok.txt?__WB_REVISION__=9f9d5cea760d8bab4561d978ef4756423506e1fa694111c516d349809649daeb",
+            "old verified first"
+          ],
+          [
+            "http://127.0.0.1:64034/asset.txt?__WB_REVISION__=51f206d3fce7c0083384cd9b6d92e984e1b00ec3a4cade44f1212a2420fc9caa",
+            "old asset"
+          ],
+          [
+            "http://127.0.0.1:64034/index.html?__WB_REVISION__=0f4274a1fc02d6564aeaf976e8688c54dea0cab8fd6a6825c1bc9066ff153341",
+            "<!doctype html><title>old</title><h1>old</h1>"
+          ]
+        ],
+        "foreign-cache": [
+          [
+            "http://127.0.0.1:64034/foreign",
+            "foreign preserved"
+          ]
+        ]
+      },
+      "partial": {
+        "task33-reading-3200090d3f3ca9303092": [
+          [
+            "http://127.0.0.1:64034/a-ok.txt?__WB_REVISION__=9f9d5cea760d8bab4561d978ef4756423506e1fa694111c516d349809649daeb",
+            "old verified first"
+          ],
+          [
+            "http://127.0.0.1:64034/asset.txt?__WB_REVISION__=51f206d3fce7c0083384cd9b6d92e984e1b00ec3a4cade44f1212a2420fc9caa",
+            "old asset"
+          ],
+          [
+            "http://127.0.0.1:64034/index.html?__WB_REVISION__=0f4274a1fc02d6564aeaf976e8688c54dea0cab8fd6a6825c1bc9066ff153341",
+            "<!doctype html><title>old</title><h1>old</h1>"
+          ]
+        ],
+        "foreign-cache": [
+          [
+            "http://127.0.0.1:64034/foreign",
+            "foreign preserved"
+          ]
+        ],
+        "task33-reading-0ace9563da5f6597b6db": [
+          [
+            "http://127.0.0.1:64034/a-ok.txt?__WB_REVISION__=8d446c640cb1b5348d6aa54fb96c713c40ea46f8545c5bd89714b9a83521d6cf",
+            "new verified first"
+          ]
+        ]
+      },
+      "after": {
+        "task33-reading-3200090d3f3ca9303092": [
+          [
+            "http://127.0.0.1:64034/a-ok.txt?__WB_REVISION__=9f9d5cea760d8bab4561d978ef4756423506e1fa694111c516d349809649daeb",
+            "old verified first"
+          ],
+          [
+            "http://127.0.0.1:64034/asset.txt?__WB_REVISION__=51f206d3fce7c0083384cd9b6d92e984e1b00ec3a4cade44f1212a2420fc9caa",
+            "old asset"
+          ],
+          [
+            "http://127.0.0.1:64034/index.html?__WB_REVISION__=0f4274a1fc02d6564aeaf976e8688c54dea0cab8fd6a6825c1bc9066ff153341",
+            "<!doctype html><title>old</title><h1>old</h1>"
+          ]
+        ],
+        "foreign-cache": [
+          [
+            "http://127.0.0.1:64034/foreign",
+            "foreign preserved"
+          ]
+        ]
+      },
+      "offlineTitle": "old",
+      "requests": [
+        {
+          "version": "old",
+          "path": "/",
+          "corrupt": false
+        },
+        {
+          "version": "old",
+          "path": "/favicon.ico",
+          "corrupt": false
+        },
+        {
+          "version": "old",
+          "path": "/sw.js",
+          "corrupt": false
+        },
+        {
+          "version": "old",
+          "path": "/a-ok.txt",
+          "corrupt": false
+        },
+        {
+          "version": "old",
+          "path": "/asset.txt",
+          "corrupt": false
+        },
+        {
+          "version": "old",
+          "path": "/index.html",
+          "corrupt": false
+        },
+        {
+          "version": "old",
+          "path": "/favicon.ico",
+          "corrupt": false
+        },
+        {
+          "version": "new",
+          "path": "/sw.js",
+          "corrupt": true
+        },
+        {
+          "version": "new",
+          "path": "/a-ok.txt",
+          "corrupt": true
+        },
+        {
+          "version": "new",
+          "path": "/asset.txt",
+          "corrupt": true
+        }
+      ]
+    },
+    {
+      "case": "successful update negative control",
+      "state": "installed",
+      "before": {
+        "task33-reading-3200090d3f3ca9303092": [
+          [
+            "http://127.0.0.1:64034/a-ok.txt?__WB_REVISION__=9f9d5cea760d8bab4561d978ef4756423506e1fa694111c516d349809649daeb",
+            "old verified first"
+          ],
+          [
+            "http://127.0.0.1:64034/asset.txt?__WB_REVISION__=51f206d3fce7c0083384cd9b6d92e984e1b00ec3a4cade44f1212a2420fc9caa",
+            "old asset"
+          ],
+          [
+            "http://127.0.0.1:64034/index.html?__WB_REVISION__=0f4274a1fc02d6564aeaf976e8688c54dea0cab8fd6a6825c1bc9066ff153341",
+            "<!doctype html><title>old</title><h1>old</h1>"
+          ]
+        ],
+        "foreign-cache": [
+          [
+            "http://127.0.0.1:64034/foreign",
+            "foreign preserved"
+          ]
+        ]
+      },
+      "after": {
+        "task33-reading-3200090d3f3ca9303092": [
+          [
+            "http://127.0.0.1:64034/a-ok.txt?__WB_REVISION__=9f9d5cea760d8bab4561d978ef4756423506e1fa694111c516d349809649daeb",
+            "old verified first"
+          ],
+          [
+            "http://127.0.0.1:64034/asset.txt?__WB_REVISION__=51f206d3fce7c0083384cd9b6d92e984e1b00ec3a4cade44f1212a2420fc9caa",
+            "old asset"
+          ],
+          [
+            "http://127.0.0.1:64034/index.html?__WB_REVISION__=0f4274a1fc02d6564aeaf976e8688c54dea0cab8fd6a6825c1bc9066ff153341",
+            "<!doctype html><title>old</title><h1>old</h1>"
+          ]
+        ],
+        "foreign-cache": [
+          [
+            "http://127.0.0.1:64034/foreign",
+            "foreign preserved"
+          ]
+        ],
+        "task33-reading-0ace9563da5f6597b6db": [
+          [
+            "http://127.0.0.1:64034/a-ok.txt?__WB_REVISION__=8d446c640cb1b5348d6aa54fb96c713c40ea46f8545c5bd89714b9a83521d6cf",
+            "new verified first"
+          ],
+          [
+            "http://127.0.0.1:64034/asset.txt?__WB_REVISION__=ae6e43da7619f229491fa7353b4725dc46f228b39fddde0fca78268e4675d727",
+            "new asset"
+          ],
+          [
+            "http://127.0.0.1:64034/index.html?__WB_REVISION__=73caf7eb9594f5c2a5d607f847df79ec6bd13210b3bc11e30026493001f15382",
+            "<!doctype html><title>new</title><h1>new</h1>"
+          ]
+        ]
+      },
+      "activated": {
+        "foreign-cache": [
+          [
+            "http://127.0.0.1:64034/foreign",
+            "foreign preserved"
+          ]
+        ],
+        "task33-reading-0ace9563da5f6597b6db": [
+          [
+            "http://127.0.0.1:64034/a-ok.txt?__WB_REVISION__=8d446c640cb1b5348d6aa54fb96c713c40ea46f8545c5bd89714b9a83521d6cf",
+            "new verified first"
+          ],
+          [
+            "http://127.0.0.1:64034/asset.txt?__WB_REVISION__=ae6e43da7619f229491fa7353b4725dc46f228b39fddde0fca78268e4675d727",
+            "new asset"
+          ],
+          [
+            "http://127.0.0.1:64034/index.html?__WB_REVISION__=73caf7eb9594f5c2a5d607f847df79ec6bd13210b3bc11e30026493001f15382",
+            "<!doctype html><title>new</title><h1>new</h1>"
+          ]
+        ]
+      },
+      "offlineTitle": "new",
+      "requests": [
+        {
+          "version": "old",
+          "path": "/",
+          "corrupt": false
+        },
+        {
+          "version": "old",
+          "path": "/favicon.ico",
+          "corrupt": false
+        },
+        {
+          "version": "old",
+          "path": "/sw.js",
+          "corrupt": false
+        },
+        {
+          "version": "old",
+          "path": "/a-ok.txt",
+          "corrupt": false
+        },
+        {
+          "version": "old",
+          "path": "/asset.txt",
+          "corrupt": false
+        },
+        {
+          "version": "old",
+          "path": "/index.html",
+          "corrupt": false
+        },
+        {
+          "version": "old",
+          "path": "/favicon.ico",
+          "corrupt": false
+        },
+        {
+          "version": "new",
+          "path": "/sw.js",
+          "corrupt": false
+        },
+        {
+          "version": "new",
+          "path": "/a-ok.txt",
+          "corrupt": false
+        },
+        {
+          "version": "new",
+          "path": "/asset.txt",
+          "corrupt": false
+        },
+        {
+          "version": "new",
+          "path": "/index.html",
+          "corrupt": false
+        },
+        {
+          "version": "new",
+          "path": "/sw.js",
+          "corrupt": false
+        },
+        {
+          "version": "new",
+          "path": "/favicon.ico",
+          "corrupt": false
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+✔ installed offline candidate resolves explicit index documents from directory-only corpus (40.5608ms)
+✔ installed offline precache route isolates interrupted navigation and repeated recovery (12.2797ms)
+✔ installed offline fallback route isolates interrupted navigation and repeated recovery (5.3994ms)
+✔ installed offline candidate keeps a distinct exact file before its directory alias (1.8154ms)
+✔ installed offline aliases retain method, origin, query, exclusion and resource guards (1.7271ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2245.7606
