@@ -1,0 +1,18 @@
+{"browser":"154.0.8037.57","worker":"http://127.0.0.1:43253/reading-worker.js"}
+{"control":"excluded direct fetch abort","closeAfterAbortMs":3.9759949999997843}
+{"cycle":0,"target":"/contact/","supersession":"ERR_ABORTED","socketMs":1000.943612,"closeAfterSupersessionMs":999.6412209999999}
+{"cycle":0,"target":"/contact/","deadline":"cached bytes match","peer":"healthy","socketMs":1000.2464200000004}
+{"cycle":0,"target":"/unknown-probe/","supersession":"ERR_ABORTED","socketMs":1000.2469729999993,"closeAfterSupersessionMs":993.9820059999993}
+{"cycle":0,"target":"/unknown-probe/","deadline":"cached bytes match","peer":"healthy","socketMs":1000.3950700000005}
+{"cycle":0,"http503":"unchanged known+unknown","tcpDisconnect":"cached known+fallback","reconnect":"online"}
+{"cycle":1,"target":"/contact/","supersession":"ERR_ABORTED","socketMs":1000.6555619999999,"closeAfterSupersessionMs":995.9751309999992}
+{"cycle":1,"target":"/contact/","deadline":"cached bytes match","peer":"healthy","socketMs":999.5826040000002}
+{"cycle":1,"target":"/unknown-probe/","supersession":"ERR_ABORTED","socketMs":1000.4054140000007,"closeAfterSupersessionMs":996.148908000001}
+{"cycle":1,"target":"/unknown-probe/","deadline":"cached bytes match","peer":"healthy","socketMs":1000.4670829999995}
+{"cycle":1,"http503":"unchanged known+unknown","tcpDisconnect":"cached known+fallback","reconnect":"online"}
+{"cycle":2,"target":"/contact/","supersession":"ERR_ABORTED","socketMs":1001.075229,"closeAfterSupersessionMs":999.636876999999}
+{"cycle":2,"target":"/contact/","deadline":"cached bytes match","peer":"healthy","socketMs":1000.9326860000001}
+{"cycle":2,"target":"/unknown-probe/","supersession":"ERR_ABORTED","socketMs":999.4421549999988,"closeAfterSupersessionMs":991.0888190000005}
+{"cycle":2,"target":"/unknown-probe/","deadline":"cached bytes match","peer":"healthy","socketMs":1000.3553819999997}
+{"cycle":2,"http503":"unchanged known+unknown","tcpDisconnect":"cached known+fallback","reconnect":"online"}
+PASS: six supersessions retain fetch until deadline; six overlapping deadline/recovery cases; three 503/disconnect/reconnect cycles.

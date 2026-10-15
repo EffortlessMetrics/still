@@ -1,0 +1,73 @@
+Independent review, 2026-10-15 UTC
+
+Decision: no blocking findings in the evidence-only candidate. No runtime or
+archive repair is warranted by the measured behavior. The delivered README
+permits network-first transport-failure/timeout recovery and makes no immediate
+supersession guarantee. The observed one-second wait for headers fits that
+contract. It consumes request/connection state; the experiment does not establish
+meaningful bandwidth, CPU, memory growth or connection-pool contention.
+
+Identity reviewed:
+  HEAD 74d10f14370bd36435d250d2cc189f2e84d258da
+  HEAD tree 489eedf701d17b7b293d5b29f60fea6c7a8c7231
+  Runtime candidate 278fc3cf05777d30c552d2b771e408931bf092f6
+  Runtime candidate tree 71c1c34c058fa91a99535af54053fde1e7e4400e
+  Branch review/navigation-retention-cost-20261015
+  README SHA256 31e513542a752ec82af0c53909be66ebfaf30edc9c9a384f6d86d5d0b684c345
+  Probe SHA256 206a61b96367fb273a20afb0f16ac2905c961e151dd849fca2141adea22a27c0
+
+Reviewed delivered worker implementation, package README/CHANGELOG, installed
+route tests, original evidence74d10f1 and final new README/probe/logs. No standalone
+AGENTS.md was found. Applied the engineering delivery skill to this bounded review.
+Remote ownership/access observations in README are coordinating-owner evidence;
+this reviewer did not retry the denied API route or independently refresh remote
+ownership. No original refs or runtime/package files were changed by this review.
+
+Independent executions:
+  node --test scripts/offline-routes.test.mjs
+  PASS 5/5, covering isolated deadlines, cleanup, online responses and recovery.
+
+  Disposable Node VM test against the actual installed worker: start six handler
+  requests with distinct incoming signals, abort those incoming signals, verify
+  all six outgoing signals remain pending; expire each controlled deadline,
+  verify all six outgoing aborts, six cached responses and zero remaining timers.
+  PASS. This synthetic discriminator proves signal replacement at the source
+  boundary, not that Chromium actually aborts its incoming navigation signal.
+  The disposable test was executed inline; no candidate test source was modified.
+
+  STILL_PLAYWRIGHT_MODULE=/workspace/still-core/node_modules/playwright timeout 50s
+    node reviews/2026-10-15-retention-cost/probe.cjs
+  PASS, exit 0; full output independent-browser.log, empty stderr retained.
+  Node v24.19.0; /usr/bin/chromium 154.0.8037.57, headless Linux loopback.
+  27 incoming and 27 outgoing observations, zero incoming aborts, 12 outgoing
+  deadline aborts. Six supersessions retained upstream until their deadline;
+  six overlapping peer/recovery cases and three HTTP503/disconnect/reconnect
+  cycles passed. Two streaming responses closed 3.57/4.17 ms after navigation
+  away, at total lifetimes 109.00/109.67 ms, with 5108 attempted server bytes each.
+
+Independent browser log SHA256:
+  531538455dc5bf8f3fa3195677640e19e64c5110538f16539a7c1e4c8ce5ad88
+Independent stderr SHA256 (empty):
+  e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+Installed worker SHA256:
+  6f96bfccdc437421ce15748c5a8cf30a9fa0386eafd5d5f200742aa29f06aaec
+Accepted archive SHA256:
+  e8cb8779d076896e437fb309a5c3ce2d15d5620a1e1d0508d614ff6f09d17a06
+Generated worker SHA256:
+  70f2d6bed95c6b97eaaa12fcf8a60c119a202468d2733fd5b16a5122d9c4b6a8
+
+Counterexamples and interpretation limits:
+  Combining incoming signal and timeout cannot repair this observed browser case
+  because the observed incoming signals never aborted. A global latest-request
+  controller would couple unrelated clients. Reducing the deadline changes the
+  accepted online/offline behavior; no measured benefit justifies that change.
+  The deadline ends when fetch resolves its Response, so body lifetime is outside
+  its guarantee. Early body closure is separately observed here; neither body
+  write counts nor socket closure establish client consumption or server CPU
+  cancellation. A completed Playwright goto does not prove a stream fully loaded;
+  server closure and final about:blank are the discriminators in that phase.
+  Abandoned burst harness attempts establish no concurrency product result.
+  These are local Chromium observations, with instrumentation restricted to the
+  disposable server response. They do not qualify other browsers, hosted traffic,
+  updates, rollback or production lifecycle behavior. Original owner/protection
+  observations remain the coordinating owner's responsibility before integration.

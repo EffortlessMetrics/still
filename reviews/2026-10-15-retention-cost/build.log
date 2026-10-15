@@ -1,0 +1,29 @@
+# Astro stdout; trailing whitespace normalized for repository storage.
+
+> still-neutral-starter@0.2.0 build
+> astro build
+
+04:37:29 [types] Generated 256ms
+04:37:29 [build] output: "static"
+04:37:29 [build] mode: "static"
+04:37:29 [build] directory: /workspace/still-retention/dist/
+04:37:29 [build] Collecting build info...
+04:37:29 [build] ✓ Completed in 305ms.
+04:37:29 [build] Building static entrypoints...
+04:37:29 [vite] ✓ built in 209ms
+04:37:29 [vite] ✓ built in 28ms
+04:37:29 [build] Rearranging server assets...
+
+ generating static routes
+04:37:29   ├─ /404.html (+14ms)
+04:37:29   ├─ /contact/index.html (+3ms)
+04:37:29   ├─ /offline/index.html (+2ms)
+04:37:29   ├─ /project-support/index.html (+2ms)
+04:37:29   ├─ /robots.txt (+2ms)
+04:37:29   ├─ /workshops/index.html (+2ms)
+04:37:29   ├─ /index.html (+2ms)
+04:37:29 ✓ Completed in 38ms.
+
+04:37:29 [build] ✓ Completed in 307ms.
+04:37:29 [build] 6 page(s) built in 682ms
+04:37:29 [build] Complete!

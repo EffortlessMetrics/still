@@ -1,0 +1,5 @@
+
+> still-neutral-starter@0.2.0 verify:starter
+> node scripts/verify-starter.mjs
+
+Starter output passes: 7 HTML files, preview indexing, configured identity/links/sitemap, marked contact examples, offline page digests/fallback/fonts and notices.

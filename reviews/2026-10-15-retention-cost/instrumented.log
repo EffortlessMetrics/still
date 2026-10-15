@@ -1,0 +1,21 @@
+{"browser":"154.0.8037.57","worker":"http://127.0.0.1:36795/reading-worker.js"}
+{"control":"excluded direct fetch abort","closeAfterAbortMs":2.96840700000007}
+{"cycle":0,"target":"/contact/","supersession":"ERR_ABORTED","socketMs":1000.7414959999999,"closeAfterSupersessionMs":994.383998}
+{"cycle":0,"target":"/contact/","deadline":"cached bytes match","peer":"healthy","socketMs":1000.5425850000001}
+{"cycle":0,"target":"/unknown-probe/","supersession":"ERR_ABORTED","socketMs":1000.3362840000004,"closeAfterSupersessionMs":995.5978750000004}
+{"cycle":0,"target":"/unknown-probe/","deadline":"cached bytes match","peer":"healthy","socketMs":1000.4358260000008}
+{"cycle":0,"http503":"unchanged known+unknown","tcpDisconnect":"cached known+fallback","reconnect":"online"}
+{"cycle":1,"target":"/contact/","supersession":"ERR_ABORTED","socketMs":1001.7175860000007,"closeAfterSupersessionMs":994.7981920000002}
+{"cycle":1,"target":"/contact/","deadline":"cached bytes match","peer":"healthy","socketMs":1000.3002379999998}
+{"cycle":1,"target":"/unknown-probe/","supersession":"ERR_ABORTED","socketMs":1000.6021550000005,"closeAfterSupersessionMs":995.5738520000004}
+{"cycle":1,"target":"/unknown-probe/","deadline":"cached bytes match","peer":"healthy","socketMs":1000.2456409999995}
+{"cycle":1,"http503":"unchanged known+unknown","tcpDisconnect":"cached known+fallback","reconnect":"online"}
+{"cycle":2,"target":"/contact/","supersession":"ERR_ABORTED","socketMs":1000.7359230000002,"closeAfterSupersessionMs":994.3328820000006}
+{"cycle":2,"target":"/contact/","deadline":"cached bytes match","peer":"healthy","socketMs":1000.4542590000001}
+{"cycle":2,"target":"/unknown-probe/","supersession":"ERR_ABORTED","socketMs":1004.8646750000007,"closeAfterSupersessionMs":1002.0886640000008}
+{"cycle":2,"target":"/unknown-probe/","deadline":"cached bytes match","peer":"healthy","socketMs":1008.1438009999983}
+{"cycle":2,"http503":"unchanged known+unknown","tcpDisconnect":"cached known+fallback","reconnect":"online"}
+{"incomingSignals":27,"incomingAborted":0,"outgoingDeadlineAborted":12,"hangingResponseBodyBytes":0}
+{"stream":"/contact/","navigationOutcome":"completed","closeAfterSupersessionMs":7.836346000000049,"lifetimeMs":118.74164200000087,"bytesWritten":5108,"serverSafetyLimitMs":1500}
+{"stream":"/unknown-probe/","navigationOutcome":"completed","closeAfterSupersessionMs":4.978381999999328,"lifetimeMs":111.6497589999999,"bytesWritten":5108,"serverSafetyLimitMs":1500}
+PASS: incoming/outgoing signal observation and bounded streaming observations; six supersessions retain fetch until deadline; six overlapping deadline/recovery cases; three 503/disconnect/reconnect cycles.
