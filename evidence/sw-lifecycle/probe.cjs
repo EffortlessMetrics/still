@@ -18,7 +18,7 @@ const deadline = async (label, fn) => {
 (async () => {
   const candidate = execFileSync('git', ['rev-parse','HEAD'], {cwd:source,encoding:'utf8'}).trim();
   assert.equal(execFileSync('git',['diff','278fc3cf05777d30c552d2b771e408931bf092f6','--','src','public','scripts','vendor','licenses','astro.config.mjs','site.config.mjs','package.json','package-lock.json','STARTER-DELIVERY.json'], {cwd:source,encoding:'utf8'}), '');
-  log('candidate',{commit:candidate, tree:'71c1c34c058fa91a99535af54053fde1e7e4400e'});
+  log('candidate',{commit:candidate, tree:execFileSync('git',['rev-parse','HEAD^{tree}'],{cwd:source,encoding:'utf8'}).trim(), productionCandidate:'278fc3cf05777d30c552d2b771e408931bf092f6', productionTree:'71c1c34c058fa91a99535af54053fde1e7e4400e'});
   const temporary = await fs.mkdtemp(path.join(os.tmpdir(), 'still-sw-lifecycle-'));
   let browser, server;
   const sockets = new Set();

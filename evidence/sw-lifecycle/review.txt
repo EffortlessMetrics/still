@@ -1,6 +1,6 @@
 Independent review: no blocking findings.
 
-Reviewed final probe and completed browser run for production candidate 278fc3cf05777d30c552d2b771e408931bf092f6, tree 71c1c34c058fa91a99535af54053fde1e7e4400e. The probe asserts tracked production inputs unchanged against that candidate. Git HEAD/tree independently matched at review.
+Reviewed final probe and completed browser run for production candidate 278fc3cf05777d30c552d2b771e408931bf092f6, tree 71c1c34c058fa91a99535af54053fde1e7e4400e. The probe asserts tracked production inputs unchanged against that candidate. Git HEAD/tree independently matched at review. The latest run records evidence commit d522d83a211da1410d6c9207a0539e65372de09f, current tree e5ba1c75ab6d3fd8367ecf17c0e4a2663e282f99, separately from the unchanged production candidate/tree. Current and baseline fields were independently checked.
 
 The final run establishes same-origin A -> B -> A with two old clients holding each installed update waiting, previous corpus served offline while waiting, and natural activation only after both old clients close. No worker source changes, forced takeover, unregister, or cache clearing occur. Distinct HTML/worker hashes, exact offline known/fallback/B-only bytes, owned cache keys, foreign sentinel content and actual worker revision/ownState corroborate lifecycle identity. Final rollback retains only A owned cache and foreign sentinel, without B-only entry. Six HTTP 503 navigations return exact fixture status/body through the worker.
 
@@ -8,5 +8,5 @@ active() is adequate: workerFor selects the distinct expected global REVISION, t
 
 Evidence limits: Node24.19.0 and local headless Chromium154.0.8037.57 only; explicit initial registration is used. Production connection-aware/idle registration eligibility is not qualified by this final run. Earlier unbounded-ready stall and dependency-symlink build failure are harness/provisioning observations, not worker findings. No hosted deployment, browser matrix or stalled-transport timeout test is claimed.
 
-Log SHA256: 167a0aa6e3298bf90c75b2cc23e608d16fef14e9cbe530cba777dde5698d2a81
-Probe SHA256: 67dc7c3ee18a950f99564069a23e22207a145d99e8daf49122d9502a6e2ea192
+Log SHA256: eb83d7dc5c6f805a6ba45f15475409f806fe0ad61c176e4d0f0b0466cbab754f
+Probe SHA256: 3597b0df80adf2ca21a9f9958811ac97f380f6ded5a4aa3082d0f9c10a99984c

@@ -20,7 +20,7 @@ security or billing change was made.
 
 Node 24.19.0, npm 11.9.0, installed Playwright 1.63.0 and system Chromium
 154.0.8037.57, in the selected Linux executor. The final browser process exited 0.
-The effective origin was `http://127.0.0.1:44223`, with one retained browser
+The effective origin was `http://127.0.0.1:39531`, with one retained browser
 context, root scope, `reading-worker.js` and `still-starter-reading-` throughout.
 
 `probe.cjs` copies the starter and its frozen installed dependencies to one
@@ -95,6 +95,7 @@ response hashes/status/worker provenance and elapsed response times. `focused.lo
 records 15/15 passing route/delivery tests on the exact candidate. `delivery.json`
 authenticates all three active packages (19/31/12 packaged files), `licenses.log`
 records retained notices, and `install.log` records the offline frozen install.
+The final browser run used evidence checkout `d522d83a211da1410d6c9207a0539e65372de09f`; its production inputs remain identical to the combined candidate.
 `review.txt` and `log-audit.json` contain the independent review and log audit;
 the reviewer inspected the final harness and independently asserted its recorded
 results, without rerunning Chromium. `SHA256SUMS` binds the published files.
@@ -113,3 +114,9 @@ package-version migration, stalled-transport timeout/cancellation, or client
 registration eligibility. Prior deadline/cancellation evidence remains tied to
 its original run/candidate. No broad CI or full preview/production matrix was
 rerun for this evidence-only change.
+
+Post-push GitHub Actions visibility: the read-only `gh api` workflow-run lookup
+returned `Forbidden`. No alternate access route was attempted. Workflow trigger
+inspection supports branch-push safety, but the actual post-push run list remains
+unconfirmed. Remote main, combined and PR17/PR19 owner heads were freshly checked
+and remain unchanged.
