@@ -65,9 +65,22 @@ No Cargo invocation or expensive qualification ran. Resources are isolated under
 H:\Temp\still-task33-*; other worktrees and caches were not changed. No global
 configuration, release, deployment, credentials or protections were changed.
 
-The prior lifecycle owner records a PR hold because opening a PR triggers the
-full preview/production matrix. That hold is preserved pending the coordinating
-owner's integration decision. This evidence lane is not a competing runtime fix.
+Earlier delegated-work reports deferred PR creation until a coordinated late
+integration gate because opening a PR to main runs the full preview/production
+matrix. This is a qualification scheduling dependency, not a verified user hold.
+Current authorization covers scoped owned-repository draft PRs. Coordinate this
+evidence with the delivery integration owner to avoid duplicate broad runs.
+This evidence lane is not a competing runtime fix. Process interruption remains
+untested.
+
+Tracking correction: the earlier scheduling limit appears in issue 20 comment
+6182035717 (EffortlessSteven, 2026-10-15 01:08:58 UTC), and the explicit phrase
+"PR HOLD retained because opening launches full matrix" appears in comment
+6182433600 (same account, 01:41:32 UTC). These delegated-work reports targeted
+integrate/delivery-interrupted-navigation at 278fc3cf05777d30c552d2b771e408931bf092f6;
+no direct user instruction establishing a continuing publication hold was found.
+The prior version of this evidence README incorrectly promoted that scheduling
+limit into a continuing user hold. No such authorization hold is asserted here.
 
 Final portable run exited 0 and passed both browser cases. browser.json is the
 complete final run at fixture H:\Temp\still-failed-precache-VPYJfv. The final
@@ -81,3 +94,4 @@ and verified Git provenance; it did not independently rerun Chromium.
 Dependency provisioning used npm 11.18.0 under host Node26.5 with engine warnings
 and ignore-scripts; the frozen lock installation completed with 592 packages,
 zero audit findings. All recorded final probes/audits/tests used Node24.19.0.
+
