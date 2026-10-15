@@ -1,0 +1,18 @@
+{"browser":"154.0.8037.57","worker":"http://127.0.0.1:43689/reading-worker.js"}
+{"control":"excluded direct fetch abort","closeAfterAbortMs":3.1014999999999873}
+{"cycle":0,"target":"/contact/","supersession":"ERR_ABORTED","socketMs":1004.7901410000001,"closeAfterSupersessionMs":998.7445480000001}
+{"cycle":0,"target":"/contact/","deadline":"cached bytes match","peer":"healthy","socketMs":1001.0511219999999}
+{"cycle":0,"target":"/unknown-probe/","supersession":"ERR_ABORTED","socketMs":1000.178199,"closeAfterSupersessionMs":993.344075}
+{"cycle":0,"target":"/unknown-probe/","deadline":"cached bytes match","peer":"healthy","socketMs":1000.3978989999996}
+{"cycle":0,"http503":"unchanged known+unknown","tcpDisconnect":"cached known+fallback","reconnect":"online"}
+{"cycle":1,"target":"/contact/","supersession":"ERR_ABORTED","socketMs":1000.1791720000001,"closeAfterSupersessionMs":993.6359459999994}
+{"cycle":1,"target":"/contact/","deadline":"cached bytes match","peer":"healthy","socketMs":999.2684440000003}
+{"cycle":1,"target":"/unknown-probe/","supersession":"ERR_ABORTED","socketMs":1000.7826830000004,"closeAfterSupersessionMs":995.1012500000006}
+{"cycle":1,"target":"/unknown-probe/","deadline":"cached bytes match","peer":"healthy","socketMs":1000.8171450000009}
+{"cycle":1,"http503":"unchanged known+unknown","tcpDisconnect":"cached known+fallback","reconnect":"online"}
+{"cycle":2,"target":"/contact/","supersession":"ERR_ABORTED","socketMs":1000.276828,"closeAfterSupersessionMs":993.5422780000008}
+{"cycle":2,"target":"/contact/","deadline":"cached bytes match","peer":"healthy","socketMs":1000.5642090000001}
+{"cycle":2,"target":"/unknown-probe/","supersession":"ERR_ABORTED","socketMs":999.614313,"closeAfterSupersessionMs":993.3426280000003}
+{"cycle":2,"target":"/unknown-probe/","deadline":"cached bytes match","peer":"healthy","socketMs":999.8004880000008}
+{"cycle":2,"http503":"unchanged known+unknown","tcpDisconnect":"cached known+fallback","reconnect":"online"}
+PASS: six supersessions retain fetch until deadline; six overlapping deadline/recovery cases; three 503/disconnect/reconnect cycles.

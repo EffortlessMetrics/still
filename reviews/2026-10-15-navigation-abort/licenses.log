@@ -1,0 +1,17 @@
+✔ application terms, privacy and scoped owner notices are independent of retained upstream grants (169.205129ms)
+▶ license regressions follow active consumer delivery after ordinary dependency updates
+  ✔ exact registry pins need no bundled receipt or vendor directory (1312.926577ms)
+  ✔ bundled pins use current receipt paths outside vendor (1362.433864ms)
+  ✔ independent registry upgrade ignores its historical bundled receipt (1358.207383ms)
+✔ license regressions follow active consumer delivery after ordinary dependency updates (4065.666142ms)
+✔ owner notices do not replace required template or component notices (206.99739ms)
+✔ complete Apache terms survive formatting changes; missing patent grants fail in every notice (372.499465ms)
+✔ active delivery and version-independent bundled/registry license fixtures (460.407832ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 8
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 5335.228446
