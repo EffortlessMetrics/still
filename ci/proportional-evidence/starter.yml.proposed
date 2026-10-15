@@ -1,0 +1,79 @@
+name: Standalone starter
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  route:
+    runs-on: ubuntu-latest
+    outputs:
+      product: ${{ steps.route.outputs.product }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38
+        with:
+          node-version: '24.19.0'
+      - id: route
+        run: node ci/proportional-evidence/route.mjs
+  evidence:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38
+        with:
+          node-version: '24.19.0'
+      - run: node --test ci/proportional-evidence/*.test.mjs
+      - run: node ci/proportional-evidence/validate.mjs
+  starter:
+    needs: route
+    if: needs.route.outputs.product != 'false'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        site-environment: [preview, production]
+    env:
+      PUBLIC_SITE_ENV: ${{ matrix.site-environment }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38
+        with:
+          node-version: '24.19.0'
+      - run: npm ci --ignore-scripts
+      - run: npm run check
+      - run: npm run build
+      - run: npm run verify:starter
+      - run: node scripts/verify-licenses.mjs
+      - run: npm run test:licenses
+      - run: npm run test:starter
+  qualification:
+    if: always()
+    needs: [route, evidence, starter]
+    runs-on: ubuntu-latest
+    env:
+      ROUTE_RESULT: ${{ needs.route.result }}
+      PRODUCT: ${{ needs.route.outputs.product }}
+      EVIDENCE_RESULT: ${{ needs.evidence.result }}
+      STARTER_RESULT: ${{ needs.starter.result }}
+    steps:
+      - run: |
+          test "$ROUTE_RESULT" = success
+          test "$EVIDENCE_RESULT" = success
+          if [ "$PRODUCT" = false ]; then
+            test "$STARTER_RESULT" = skipped
+          else
+            test "$PRODUCT" = true
+            test "$STARTER_RESULT" = success
+          fi

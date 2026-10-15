@@ -1,0 +1,4 @@
+[
+  {"name":"pull_request","event":{"pull_request":{"base":{"sha":"BASE"},"head":{"sha":"HEAD"},"draft":true}}},
+  {"name":"push","event":{"before":"BASE","after":"HEAD","ref":"refs/heads/main"}}
+]
