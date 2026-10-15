@@ -94,4 +94,3 @@ and verified Git provenance; it did not independently rerun Chromium.
 Dependency provisioning used npm 11.18.0 under host Node26.5 with engine warnings
 and ignore-scripts; the frozen lock installation completed with 592 packages,
 zero audit findings. All recorded final probes/audits/tests used Node24.19.0.
-
