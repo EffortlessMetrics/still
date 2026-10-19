@@ -215,7 +215,7 @@ test('isolated owner content, sitemap, output directory and negative controls', 
     succeeds(run(root, 'npm', ['run', 'check']));
     succeeds(run(root, 'npm', ['run', 'build']));
     const directory = join(root, 'dist');
-    const options = { directory, site, production, root };
+    const options = { directory, site, production, root, base: '/' };
 
     await t.test('owner licensing, contact replacement and generated/renamed routes pass without template edits', async () => {
       succeeds(run(root, 'npm', ['run', 'verify:licenses']));
@@ -228,6 +228,15 @@ test('isolated owner content, sitemap, output directory and negative controls', 
       const worker = await readFile(join(directory, site.offline.workerFile), 'utf8');
       const digests = JSON.parse(worker.match(/const DIGESTS=(\{[^\n]+\});/)[1]);
       assert.equal(digests['/sitemap.xml'], createHash('sha256').update(xml).digest('hex'));
+    });
+
+    await t.test('direct verification requires an explicit effective base before reading output', async () => {
+      const missingBase = {...options};
+      Reflect.deleteProperty(missingBase, 'base');
+      for (const omitted of [missingBase, {...options, base: undefined}, {...options, base: null},
+        {...missingBase, directory: join(root, 'not-built')}])
+        await assert.rejects(verifyStarter(omitted), /Supply the effective Astro base explicitly/);
+      assert.equal(await verifyStarter({...options, base: '/'}), 10);
     });
 
     await t.test('non-root consumer configuration cannot build or certify retained root output', async () => {

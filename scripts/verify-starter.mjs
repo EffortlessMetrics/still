@@ -99,7 +99,8 @@ function verifyContactExamples(html, file) {
 }
 
 /** Validate configured consumer output, its required notices and retained demos. */
-export async function verifyStarter({ directory, site, production, root = process.cwd(), base = '/' }) {
+export async function verifyStarter({ directory, site, production, root = process.cwd(), base }) {
+  assert.equal(typeof base, 'string', 'Supply the effective Astro base explicitly before verifying output');
   assertRootBase(base);
   const read = (file) => readFile(join(directory, file), 'utf8');
   const origin = new URL(site.origin).origin;
