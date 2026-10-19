@@ -264,7 +264,7 @@ test('isolated owner content, sitemap, output directory and negative controls', 
         // A build-only setup hook can also restore root and select a different
         // output directory. Verification must use both final values, not raw config.
         await cp(directory, join(root, 'effective-output'), {recursive: true});
-        await writeFile(configFile, `import config from './astro.base.mjs';\nlet calls = 0;\nexport default {...config, base:'/docs/', outDir:'./absent-output/', integrations:[...config.integrations, {name:'owner-root-output', hooks:{'astro:config:setup':({command, updateConfig})=>{if(command!=='build' || ++calls!==1) throw new Error('Owner setup must run once in build mode'); updateConfig({base:'/',outDir:'./effective-output/'});}}}]};\n`);
+        await writeFile(configFile, `import config from './astro.base.mjs';\nlet calls = 0;\nexport default {...config, base:'/docs/', outDir:'./absent-output/', integrations:[...config.integrations, {name:'owner-root-output', hooks:{'astro:config:setup':({command, updateConfig})=>{if(command!=='build' || ++calls!==1) throw new Error('Owner setup must run once in build mode'); updateConfig({base:'/',outDir:new URL('./effective-output/', import.meta.url)});}}}]};\n`);
         succeeds(run(root, 'npm', ['run', 'verify:starter']));
         assert.deepEqual(await snapshot(join(root, 'effective-output')), outputBefore, 'Verification must preserve the effective output');
         assert.deepEqual(await snapshot(), outputBefore, 'Resolving build config must not regenerate output');
