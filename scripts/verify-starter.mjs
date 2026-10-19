@@ -3,6 +3,7 @@ import { createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { isCurrentPage } from '../src/navigation.mjs';
 import { validateConfig } from 'astro/config';
 import { assertRootBase, canonicalRoute, htmlPages, sitemapRoutes } from './site-output.mjs';
 
@@ -113,8 +114,10 @@ export async function verifyStarter({ directory, site, production, root = proces
     assert.ok(html.includes(`<link rel="canonical" href="${escapeAttribute(origin + route)}">`), `${file}: canonical URL`);
     assert.ok(html.includes(`<meta property="og:url" content="${escapeAttribute(origin + route)}">`), `${file}: Open Graph URL`);
     const navigation = html.match(/<nav\b[^>]*>([\s\S]*?)<\/nav>/)?.[1] ?? '';
-    for (const link of site.navigation)
-      assert.ok(navigation.includes(`<a href="${escapeAttribute(link.href)}">${escapeText(link.label)}</a>`), `${file}: configured navigation`);
+    for (const link of site.navigation) {
+      const current = isCurrentPage(link.href, route, origin) ? ' aria-current="page"' : '';
+      assert.ok(navigation.includes(`<a href="${escapeAttribute(link.href)}"${current}>${escapeText(link.label)}</a>`), `${file}: configured navigation and current page`);
+    }
     const footer = html.match(/<footer\b[^>]*>([\s\S]*?)<\/footer>/)?.[1] ?? '';
     assert.ok(footer.includes(`<a href="${escapeAttribute(site.footer.href)}">${escapeText(site.footer.label)}</a>`), `${file}: configured footer`);
 
