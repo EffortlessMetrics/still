@@ -5,6 +5,7 @@ import { join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { validateConfig } from 'astro/config';
 import { canonicalRoute, htmlPages, sitemapRoutes } from './site-output.mjs';
+import { isCurrentPage } from '../src/navigation.mjs';
 
 /** Match the starter's emitted text encoding for configured consumer labels. */
 const escapeText = (value) => value.replace(/[&<>"']/g, (character) => ({
@@ -113,7 +114,7 @@ export async function verifyStarter({ directory, site, production, root = proces
     assert.ok(html.includes(`<meta property="og:url" content="${escapeAttribute(origin + route)}">`), `${file}: Open Graph URL`);
     const navigation = html.match(/<nav\b[^>]*>([\s\S]*?)<\/nav>/)?.[1] ?? '';
     for (const link of site.navigation) {
-      const current = link.href === route ? ' aria-current="page"' : '';
+      const current = isCurrentPage(link.href, route, origin) ? ' aria-current="page"' : '';
       assert.ok(navigation.includes(`<a href="${escapeAttribute(link.href)}"${current}>${escapeText(link.label)}</a>`), `${file}: configured navigation and current page`);
     }
     const footer = html.match(/<footer\b[^>]*>([\s\S]*?)<\/footer>/)?.[1] ?? '';

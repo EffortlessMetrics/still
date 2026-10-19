@@ -11,6 +11,7 @@ import offline from 'astromache/static-offline';
 import { site as defaults } from '../site.config.mjs';
 import { verifyStarter } from './verify-starter.mjs';
 import { htmlPages } from './site-output.mjs';
+import { isCurrentPage } from '../src/navigation.mjs';
 
 const source = fileURLToPath(new URL('../', import.meta.url));
 const production = process.env.PUBLIC_SITE_ENV === 'production';
@@ -45,6 +46,20 @@ async function writePage(root, file, route, content) {
   const layout = relative(dirname(destination), join(root, 'src/layouts/Site.astro')).replaceAll('\\', '/');
   await writeFile(destination, `---\nimport Site from '${layout}';\nimport Page from '@effortlessmetrics/still/page';\n---\n<Site title="Consumer page" description="Consumer-owned example" canonicalPath=${JSON.stringify(route)}><Page><h1>Owner content</h1>${content}</Page></Site>\n`);
 }
+
+test('current-page navigation matches same-origin page URLs', () => {
+  const origin = 'https://consumer.example.invalid';
+  for (const href of ['/sessions/', '/sessions', '/sessions/#schedule', '/sessions/?view=all',
+    '/sessions/index.html', '/sessions/index.html#schedule', './index.html', '#schedule',
+    origin + '/sessions/', '//consumer.example.invalid/sessions/index.html'])
+    assert.equal(isCurrentPage(href, '/sessions/', origin), true, href);
+  for (const href of ['/contact/', '/sessions-next/', '/Sessions/', '/sessions/index.html/',
+    'https://other.example.invalid/sessions/', '//other.example.invalid/sessions/index.html',
+    'http://consumer.example.invalid/sessions/', 'mailto:owner@example.invalid', 'http://['])
+    assert.equal(isCurrentPage(href, '/sessions/', origin), false, href);
+  assert.equal(isCurrentPage('/index.html#intro', '/', origin), true);
+  assert.equal(isCurrentPage('/', '/index.html', origin), true);
+});
 
 test('starter regressions follow active bundled and registry dependency delivery', async (t) => {
   const temporary = await mkdtemp(join(tmpdir(), 'still-dependency-delivery-'));
@@ -158,7 +173,7 @@ test('isolated owner content, sitemap, output directory and negative controls', 
   const root = await mkdtemp(join(tmpdir(), 'still-first-use-'));
   try {
     // Content fixtures are independent of the consumer's editable sample pages.
-    for (const file of ['package.json', 'package-lock.json', 'licenses', 'public', 'scripts', 'tsconfig.json', 'src/layouts', 'src/styles'])
+    for (const file of ['package.json', 'package-lock.json', 'licenses', 'public', 'scripts', 'tsconfig.json', 'src/layouts', 'src/styles', 'src/navigation.mjs'])
       await cp(join(source, file), join(root, file), { recursive: true });
     const application = JSON.parse(await readFile(join(root, 'package.json')));
     const bundled = Object.values(application.dependencies).filter((pin) => pin.startsWith('file:'));
@@ -174,7 +189,7 @@ test('isolated owner content, sitemap, output directory and negative controls', 
     await outputConfig('./dist/');
     const site = structuredClone(defaults);
     site.origin = 'https://consumer.example.invalid'; site.name = "O'Brien & Co"; site.themeStorageKey = 'consumer-theme';
-    site.navigation = [{label: 'Sessions', href: '/sessions/'}]; site.footer = {label: 'Contact the owner', href: '/contact/'};
+    site.navigation = [{label: 'Sessions', href: '/sessions/index.html#schedule'}]; site.footer = {label: 'Contact the owner', href: '/contact/'};
     site.offline.cachePrefix = 'consumer-reading-'; site.offline.worker.navigationFallback = '/fallback/index.html';
     site.offline.excludedPages = ['/redirect/']; site.sitemapExcludedPaths = ['/fallback/', '/private/'];
     // This proves that sitemap bytes are finalized BEFORE offline selection.
@@ -275,7 +290,7 @@ test('isolated owner content, sitemap, output directory and negative controls', 
       ['wrong indexing policy', (dir) => changeHtml(dir, (html) => html.replace(/<meta name="robots"[^>]*>/, `<meta name="robots" content="${production ? 'noindex,nofollow' : 'index,follow'}">`)), /indexing policy/],
       ['missing configured navigation', (dir) => changeHtml(dir, (html) => html.replace(/<nav\b[^>]*>[\s\S]*?<\/nav>/, '')), /configured navigation/],
       ['missing current-page navigation state', (dir) => changeHtml(join(dir, 'sessions'), (html) => html.replace(' aria-current="page"', '')), /configured navigation and current page/],
-      ['inactive navigation entry marked current', (dir) => changeHtml(dir, (html) => html.replace('<a href="/sessions/">', '<a href="/sessions/" aria-current="page">')), /configured navigation and current page/],
+      ['inactive navigation entry marked current', (dir) => changeHtml(dir, (html) => html.replace('<a href="/sessions/index.html#schedule">', '<a href="/sessions/index.html#schedule" aria-current="page">')), /configured navigation and current page/],
       ['stale sitemap route', async (dir) => {const file=join(dir,'sitemap.xml'); await writeFile(file,(await readFile(file,'utf8')).replace('</urlset>','<url><loc>'+site.origin+'/removed/</loc></url></urlset>'));}, /Sitemap must list exactly/],
       ['missing sitemap route', async (dir) => {const file=join(dir,'sitemap.xml'); await writeFile(file,(await readFile(file,'utf8')).replace(/<url><loc>[^<]*<\/loc><\/url>/,''));}, /Sitemap must list exactly/],
       ['incomplete sitemap document', async (dir) => {const file=join(dir,'sitemap.xml'); await writeFile(file,(await readFile(file,'utf8')).replace('</urlset>',''));}, /complete document/],
