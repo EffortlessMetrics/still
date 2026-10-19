@@ -3,6 +3,7 @@
 body{font-family:'IBM Plex Sans',system-ui,sans-serif;}
 .eyebrow,.package-price{font-family:'IBM Plex Mono',monospace;}
 .site-footer span{display:block;}
+nav a[aria-current="page"]{text-decoration:underline;}
 /* Let enlarged form text wrap without forcing the fieldset's min-content width. */
 .sample-form{max-width:680px;margin:24px 0;overflow-wrap:anywhere;}
 .sample-form fieldset{display:grid;gap:12px;border:1px solid var(--line);padding:24px;}
