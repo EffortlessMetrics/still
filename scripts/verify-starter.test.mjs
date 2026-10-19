@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { cp, mkdtemp, mkdir, readFile, readdir, writeFile, rm, rename } from 'node:fs/promises';
+import { cp, mkdtemp, mkdir, readFile, readdir, writeFile, rm, rename, stat } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import { tmpdir } from 'node:os';
 import { join, dirname, relative } from 'node:path';
@@ -215,7 +215,7 @@ test('isolated owner content, sitemap, output directory and negative controls', 
     succeeds(run(root, 'npm', ['run', 'check']));
     succeeds(run(root, 'npm', ['run', 'build']));
     const directory = join(root, 'dist');
-    const options = { directory, site, production, root };
+    const options = { directory, site, production, root, base: '/' };
 
     await t.test('owner licensing, contact replacement and generated/renamed routes pass without template edits', async () => {
       succeeds(run(root, 'npm', ['run', 'verify:licenses']));
@@ -228,6 +228,61 @@ test('isolated owner content, sitemap, output directory and negative controls', 
       const worker = await readFile(join(directory, site.offline.workerFile), 'utf8');
       const digests = JSON.parse(worker.match(/const DIGESTS=(\{[^\n]+\});/)[1]);
       assert.equal(digests['/sitemap.xml'], createHash('sha256').update(xml).digest('hex'));
+    });
+
+    await t.test('direct verification requires an explicit effective base before reading output', async () => {
+      const missingBase = {...options};
+      Reflect.deleteProperty(missingBase, 'base');
+      for (const omitted of [missingBase, {...options, base: undefined}, {...options, base: null},
+        {...missingBase, directory: join(root, 'not-built')}])
+        await assert.rejects(verifyStarter(omitted), /Supply the effective Astro base explicitly/);
+      assert.equal(await verifyStarter({...options, base: '/'}), 10);
+    });
+
+    await t.test('non-root consumer configuration cannot build or certify retained root output', async () => {
+      const configFile = join(root, 'astro.config.mjs');
+      const configBefore = await readFile(configFile);
+      const snapshot = async (target = directory) => {
+        const files = [];
+        for (const file of (await readdir(target, {recursive: true})).sort())
+          if ((await stat(join(target, file))).isFile())
+            files.push([file, createHash('sha256').update(await readFile(join(target, file))).digest('hex')]);
+        return files;
+      };
+      const outputBefore = await snapshot();
+      try {
+        for (const base of ['/docs', '/docs/', '/nested/docs/']) {
+          await writeFile(configFile, `import config from './astro.base.mjs';\nexport default {...config, base: ${JSON.stringify(base)}};\n`);
+          const built = run(root, 'npm', ['run', 'build']);
+          assert.notEqual(built.status, 0, 'Unsupported deployment must fail configuration');
+          assert.match(built.stdout + built.stderr, /Still starter requires Astro base "\/"/);
+          const verified = run(root, 'npm', ['run', 'verify:starter']);
+          assert.notEqual(verified.status, 0, 'Existing root output cannot qualify a non-root consumer');
+          assert.match(verified.stdout + verified.stderr, /Still starter requires Astro base "\/"/);
+          await assert.rejects(verifyStarter({...options, base}), /non-root base .* is unsupported/);
+          assert.deepEqual(await snapshot(), outputBefore, 'Rejection must precede output generation');
+        }
+        await writeFile(configFile, `import config from './astro.base.mjs';\nexport default {...config, integrations:[...config.integrations, {name:'owner-build-base', hooks:{'astro:config:setup':({command, updateConfig})=>{if(command==='build') updateConfig({base:'/docs/'});}}}]};\n`);
+        for (const command of ['build', 'verify:starter']) {
+          const result = run(root, 'npm', ['run', command]);
+          assert.notEqual(result.status, 0, 'Integration-updated base must reject retained root output');
+          assert.match(result.stdout + result.stderr, /Still starter requires Astro base "\/"/);
+        }
+        assert.deepEqual(await snapshot(), outputBefore, 'Integration-based rejection must preserve output');
+
+        // A build-only setup hook can also restore root and select a different
+        // output directory. Verification must use both final values, not raw config.
+        await cp(directory, join(root, 'effective-output'), {recursive: true});
+        await writeFile(configFile, `import config from './astro.base.mjs';\nlet calls = 0;\nexport default {...config, base:'/docs/', outDir:'./absent-output/', integrations:[...config.integrations, {name:'owner-root-output', hooks:{'astro:config:setup':({command, updateConfig})=>{if(command!=='build' || ++calls!==1) throw new Error('Owner setup must run once in build mode'); updateConfig({base:'/',outDir:new URL('./effective-output/', import.meta.url)});}}}]};\n`);
+        succeeds(run(root, 'npm', ['run', 'verify:starter']));
+        assert.deepEqual(await snapshot(join(root, 'effective-output')), outputBefore, 'Verification must preserve the effective output');
+        assert.deepEqual(await snapshot(), outputBefore, 'Resolving build config must not regenerate output');
+      } finally {
+        await writeFile(configFile, configBefore);
+      }
+      succeeds(run(root, 'npm', ['run', 'build']));
+      succeeds(run(root, 'npm', ['run', 'verify:starter']));
+      assert.deepEqual(await snapshot(), outputBefore, 'Restored root build must preserve every emitted byte');
     });
 
     const changeHtml = async (dir, update) => {

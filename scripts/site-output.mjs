@@ -2,6 +2,13 @@ import { readdir, readFile, writeFile, stat } from 'node:fs/promises';
 import { join, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+/** The starter's links and pinned offline preset share origin-root URLs. */
+export function assertRootBase(base = '/') {
+  if (base !== '/') throw new Error(
+    `Still starter requires Astro base "/"; non-root base ${JSON.stringify(base)} is unsupported. ` +
+    'Links, metadata, assets and the pinned offline corpus require coordinated base-path support.');
+}
+
 /** Map emitted index.html paths to the directory URLs used by the starter. */
 export const canonicalRoute = (path) => path.replace(/(^|\/)index\.html$/, '$1');
 
@@ -42,6 +49,7 @@ export default function sitemap(site) {
   return {
     name: 'still-starter-sitemap',
     hooks: {
+      'astro:config:done': ({ config }) => assertRootBase(config.base),
       'astro:build:done': async ({ dir }) => {
         const directory = fileURLToPath(dir);
         const origin = new URL(site.origin).origin;
