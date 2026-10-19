@@ -233,11 +233,11 @@ test('isolated owner content, sitemap, output directory and negative controls', 
     await t.test('non-root consumer configuration cannot build or certify retained root output', async () => {
       const configFile = join(root, 'astro.config.mjs');
       const configBefore = await readFile(configFile);
-      const snapshot = async () => {
+      const snapshot = async (target = directory) => {
         const files = [];
-        for (const file of (await readdir(directory, {recursive: true})).sort())
-          if ((await stat(join(directory, file))).isFile())
-            files.push([file, createHash('sha256').update(await readFile(join(directory, file))).digest('hex')]);
+        for (const file of (await readdir(target, {recursive: true})).sort())
+          if ((await stat(join(target, file))).isFile())
+            files.push([file, createHash('sha256').update(await readFile(join(target, file))).digest('hex')]);
         return files;
       };
       const outputBefore = await snapshot();
@@ -253,6 +253,21 @@ test('isolated owner content, sitemap, output directory and negative controls', 
           await assert.rejects(verifyStarter({...options, base}), /non-root base .* is unsupported/);
           assert.deepEqual(await snapshot(), outputBefore, 'Rejection must precede output generation');
         }
+        await writeFile(configFile, `import config from './astro.base.mjs';\nexport default {...config, integrations:[...config.integrations, {name:'owner-build-base', hooks:{'astro:config:setup':({command, updateConfig})=>{if(command==='build') updateConfig({base:'/docs/'});}}}]};\n`);
+        for (const command of ['build', 'verify:starter']) {
+          const result = run(root, 'npm', ['run', command]);
+          assert.notEqual(result.status, 0, 'Integration-updated base must reject retained root output');
+          assert.match(result.stdout + result.stderr, /Still starter requires Astro base "\/"/);
+        }
+        assert.deepEqual(await snapshot(), outputBefore, 'Integration-based rejection must preserve output');
+
+        // A build-only setup hook can also restore root and select a different
+        // output directory. Verification must use both final values, not raw config.
+        await cp(directory, join(root, 'effective-output'), {recursive: true});
+        await writeFile(configFile, `import config from './astro.base.mjs';\nlet calls = 0;\nexport default {...config, base:'/docs/', outDir:'./absent-output/', integrations:[...config.integrations, {name:'owner-root-output', hooks:{'astro:config:setup':({command, updateConfig})=>{if(command!=='build' || ++calls!==1) throw new Error('Owner setup must run once in build mode'); updateConfig({base:'/',outDir:'./effective-output/'});}}}]};\n`);
+        succeeds(run(root, 'npm', ['run', 'verify:starter']));
+        assert.deepEqual(await snapshot(join(root, 'effective-output')), outputBefore, 'Verification must preserve the effective output');
+        assert.deepEqual(await snapshot(), outputBefore, 'Resolving build config must not regenerate output');
       } finally {
         await writeFile(configFile, configBefore);
       }

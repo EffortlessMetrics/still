@@ -4,7 +4,7 @@ import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { isCurrentPage } from '../src/navigation.mjs';
-import { validateConfig } from 'astro/config';
+import { getViteConfig } from 'astro/config';
 import { assertRootBase, canonicalRoute, htmlPages, sitemapRoutes } from './site-output.mjs';
 
 /** Match the starter's emitted text encoding for configured consumer labels. */
@@ -216,10 +216,24 @@ export async function verifyStarter({ directory, site, production, root = proces
   return pages.length;
 }
 
+/** Resolve build configuration through Astro, including owner integration setup. */
+export async function verificationConfig(root) {
+  let effective;
+  const capture = {name: 'still-starter-verification-config', hooks: {
+    'astro:config:done': ({config}) => { effective = config; },
+  }};
+  // Astro's public tooling API uses build-mode setup and then config:done,
+  // without building pages or rewriting the output this verifier must inspect.
+  await getViteConfig({}, {root, configFile: 'astro.config.mjs', integrations: [capture]})({
+    mode: 'production', command: 'build',
+  });
+  assert.ok(effective, 'Astro must provide the effective build configuration');
+  return effective;
+}
+
 if (process.argv[1] && pathToFileURL(process.argv[1]).href === import.meta.url) {
   const root = process.cwd();
-  const {default: rawConfig} = await import(pathToFileURL(join(root, 'astro.config.mjs')));
-  const config = await validateConfig(rawConfig, root, 'build');
+  const config = await verificationConfig(root);
   const {site} = await import(pathToFileURL(join(root, 'site.config.mjs')));
   const production = process.env.PUBLIC_SITE_ENV === 'production';
   const count = await verifyStarter({directory: fileURLToPath(config.outDir), site, production, root, base: config.base});
