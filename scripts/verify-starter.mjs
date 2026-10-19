@@ -3,9 +3,9 @@ import { createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { isCurrentPage } from '../src/navigation.mjs';
 import { validateConfig } from 'astro/config';
 import { canonicalRoute, htmlPages, sitemapRoutes } from './site-output.mjs';
-import { isCurrentPage } from '../src/navigation.mjs';
 
 /** Match the starter's emitted text encoding for configured consumer labels. */
 const escapeText = (value) => value.replace(/[&<>"']/g, (character) => ({
