@@ -1,0 +1,27 @@
+---
+import Layout from '@effortlessmetrics/still/layout';
+import Header from '@effortlessmetrics/still/header';
+import Footer from '@effortlessmetrics/still/footer';
+import {site} from '../../site.config.mjs';
+import '@effortlessmetrics/still/styles.css';
+import '../styles/starter.css';
+interface Props {title:string;description:string;canonicalPath?:string;}
+const {title,description,canonicalPath='/'}=Astro.props;
+const origin=Astro.site?.origin ?? site.origin;
+---
+<Layout title={title+' | '+site.name} description={description} origin={origin} canonicalPath={canonicalPath} production={import.meta.env.PUBLIC_SITE_ENV==='production'} themeStorageKey={site.themeStorageKey} themeButtonId="site-theme-toggle">
+<Header slot="header" brand={site.name} themeButtonId="site-theme-toggle" links={site.navigation}>
+<svg slot="theme" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v3m0 14v3M2 12h3m14 0h3M5 5l2 2m10 10 2 2M5 19l2-2M17 7l2-2"/></svg>
+</Header>
+<slot/>
+<Footer slot="footer"><span>{site.name} / <a href={site.footer.href}>{site.footer.label}</a></span></Footer>
+</Layout>
+
+<script>
+import {prefetch} from 'astro:prefetch';
+import {site} from '../../site.config.mjs';
+import {installNavigationPrefetch} from 'astromache/navigation';
+import {installOfflineRegistration} from '@effortlessmetrics/astro-offline/client';
+installNavigationPrefetch(prefetch);
+if(import.meta.env.PROD) installOfflineRegistration({workerURL:new URL(site.offline.workerFile, location.origin+'/').pathname,scope:'/',requireVisible:true,idle:true,ownershipGuard:true,reuseExisting:true,onState(state){document.documentElement.dataset.offlineRegistration=state;},onLifecycle(state,details){document.documentElement.dataset.offlineLifecycle=state;document.documentElement.dataset.offlineHasActiveWorker=String(details.hasActiveWorker);document.documentElement.dataset.offlineControlsPage=String(details.controlsPage);}});
+</script>

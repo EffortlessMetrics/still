@@ -25,7 +25,13 @@ own pages. Do not restore sample pages or overwrite owner files to satisfy it.
 When adopting this tooling, compare the old and new starter source in a disposable
 copy of your application and merge the required changes:
 
-1. Bring in the reviewed `scripts/site-output.mjs` alongside the verifier. In your
+1. Bring in the reviewed `scripts/site-output.mjs` and `src/navigation.mjs` alongside
+   the verifier. The verifier imports the navigation helper even when your site
+   has no active navigation entry; omitting it fails module loading. Review any
+   existing file at that path instead of overwriting owner code; if you choose
+   another helper path, update its imports in the verifier, layout and any adopted
+   regression tests.
+   In your
    existing `astro.config.mjs`, add this import:
 
    ```js
@@ -49,18 +55,47 @@ copy of your application and merge the required changes:
    precached. Earlier copies without `name`, `themeStorageKey`, `navigation` or
    `footer` must first move their existing layout values into those config fields
    and wire their layout adapter to them, preserving the existing values.
+4. Merge the current-page state into your existing navigation adapter. In a
+   `src/layouts/Site.astro` adapter, import
+   `{isCurrentPage} from '../navigation.mjs'` in its frontmatter. Use the same
+   `origin` and `canonicalPath` values already supplied to its document layout.
+   If the adapter currently passes `links={site.navigation}` to the shared
+   Header, remove only that prop and add this named slot inside the same Header:
+
+   ```astro
+   <Fragment slot="navigation">{site.navigation.map(link =>
+     <a href={link.href} aria-current={isCurrentPage(link.href, canonicalPath, origin) ? 'page' : undefined}>{link.label}</a>
+   )}</Fragment>
+   ```
+
+   Keep the Header's other props, brand, navigation label, theme button ID, theme
+   slot and other owner controls. Keep footer content, theme storage, client
+   scripts and offline registration/policy values. For a custom navigation
+   component, merge the same href-preserving `aria-current` expression into its
+   existing link rendering instead of replacing the component. Add this small
+   rule to your owner stylesheet, adapting its scope to your navigation:
+
+   ```css
+   nav a[aria-current="page"]{text-decoration:underline;}
+   ```
+
+   The verifier requires the current state on matching page links and rejects it
+   on inactive entries. Copying the helper alone leaves an older adapter's output
+   failing that check; copying a whole default layout would risk owner values.
 
 Snapshot owner files before the migration and compare their bytes afterward;
-review only the intended config/tooling changes and the retired sitemap producer.
+review only the intended config/tooling changes, helper, bounded adapter/style
+edits and retired sitemap producer.
 Keep the old source, archives, receipt, manifest and lockfile for rollback. Reset
 acceptance claims for changed output, then run the full preview/production checks
 listed in README. Library pins and application license choices stay independent.
 
 `npm run test:upgrade` is a focused disposable-consumer control for this historical
 migration, using the retained Still 0.2.1 and accepted 0.2.2 archives in this checkout.
-It demonstrates an independent version update and the legacy config failure,
-verifies final sitemap/worker
-digests and preserved owner files/policy, and rejects reversed integration order.
+It demonstrates an independent version update, missing-helper and historical
+adapter failures, and the legacy sitemap failure. It verifies final sitemap/worker
+digests, preserved owner layout content/control IDs/files/policy, and rejects
+reversed integration order.
 It uses the installed dependency toolchain after a frozen install; it does not
 replace checks on your application's actual adapters, host or browser lifecycle.
 
