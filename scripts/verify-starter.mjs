@@ -108,12 +108,20 @@ export async function verifyStarter({ directory, site, production, root = proces
   const pages = await htmlPages(directory);
   assert.ok(pages.length > 0, 'Build at least one site page before verifying its output');
   for (const {file, route, html} of pages) {
+    // Comments, raw text, attribute values and inert template contents are not page metadata.
+    const metadataTags = new Set();
+    let templateDepth = 0;
+    for (const tag of markupTags(html)) {
+      if (tag.name === 'template') templateDepth = tag.closing ? Math.max(0, templateDepth - 1) : templateDepth + 1;
+      else if (!templateDepth && !tag.closing && (tag.name === 'link' || tag.name === 'meta'))
+        metadataTags.add(html.slice(tag.start, tag.end));
+    }
     assert.ok(html.includes(` | ${escapeText(site.name)}</title>`), `${file}: configured title suffix`);
     assert.ok(html.includes(`href="/">${escapeText(site.name)}</a>`), `${file}: configured brand`);
     assert.ok(html.includes(`data-theme-key="${escapeAttribute(site.themeStorageKey)}"`), `${file}: configured theme key`);
     assert.ok(html.includes(`<meta name="robots" content="${robots}">`), `${file}: indexing policy`);
-    assert.ok(html.includes(`<link rel="canonical" href="${escapeAttribute(origin + route)}">`), `${file}: canonical URL`);
-    assert.ok(html.includes(`<meta property="og:url" content="${escapeAttribute(origin + route)}">`), `${file}: Open Graph URL`);
+    assert.ok(metadataTags.has(`<link rel="canonical" href="${escapeAttribute(origin + route)}">`), `${file}: canonical URL`);
+    assert.ok(metadataTags.has(`<meta property="og:url" content="${escapeAttribute(origin + route)}">`), `${file}: Open Graph URL`);
     const navigation = html.match(/<nav\b[^>]*>([\s\S]*?)<\/nav>/)?.[1] ?? '';
     for (const link of site.navigation) {
       const current = isCurrentPage(link.href, route, origin) ? ' aria-current="page"' : '';
