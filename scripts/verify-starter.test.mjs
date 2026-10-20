@@ -305,6 +305,35 @@ test('isolated owner content, sitemap, output directory and negative controls', 
     };
     const withOffline = (settings) => ({...site, offline:{...site.offline, ...settings}});
     const withWorker = (policy) => withOffline({worker:{...site.offline.worker, ...policy}});
+    for (const [label, pattern, expected] of [
+      ['canonical', /<link rel="canonical"[^>]*>/, /canonical URL/],
+      ['Open Graph', /<meta property="og:url"[^>]*>/, /Open Graph URL/],
+    ]) {
+      await t.test(`${label} metadata remains valid beside comments and raw-text comment markers`, async () => {
+        const dir = join(root, 'valid-metadata'); await cp(directory, dir, {recursive:true});
+        await changeHtml(dir, (html) => html.replace(pattern, (tag) =>
+          `<!--${tag.replace(site.origin, 'https://wrong.example.invalid')}--><!--><!---><!-- preceding comment --!><script type="application/json">"<!--"</script>${tag}<script type="application/json">"-->"</script>`));
+        await refreshOffline(dir);
+        assert.equal(await verifyStarter({...options, directory:dir}), 10);
+        await rm(dir, {recursive:true});
+      });
+      for (const [context, wrap] of [
+        ['comment', (tag) => `<!--${tag}-->`],
+        ['script text', (tag) => `<script type="text/plain">${tag}</script>`],
+        ['style text', (tag) => `<style>/*${tag}*/</style>`],
+        ['quoted attribute value', (tag) => `<meta name="example" content='${tag}'>`],
+      ]) {
+        await t.test(`rejects wrong ${label} metadata masked by a ${context}`, async () => {
+          const dir = join(root, 'masked-metadata'); await cp(directory, dir, {recursive:true});
+          await changeHtml(dir, (html) => html.replace(pattern, (tag) =>
+            wrap(tag) + tag.replace(site.origin, 'https://wrong.example.invalid')));
+          // Keep offline bytes consistent so only the metadata assertion can reject it.
+          await refreshOffline(dir);
+          await assert.rejects(verifyStarter({...options, directory:dir}), expected);
+          await rm(dir, {recursive:true});
+        });
+      }
+    }
     await t.test('explicitly disabled controls remain valid outside the fieldset and quoted values stay values', async () => {
       const dir = join(root, 'disabled-controls'); await cp(directory, dir, {recursive:true});
       await changeHtml(dir, (html) => html
