@@ -1,0 +1,16 @@
+start {"width":320,"font":32,"javaScriptEnabled":true,"colorScheme":"light","route":"/contact/"}
+passed {"width":320,"font":32,"javaScriptEnabled":true,"colorScheme":"light","route":"/contact/"}
+start {"width":320,"font":32,"javaScriptEnabled":false,"colorScheme":"dark","route":"/contact/index.html?via=integration"}
+passed {"width":320,"font":32,"javaScriptEnabled":false,"colorScheme":"dark","route":"/contact/index.html?via=integration"}
+start {"width":390,"font":16,"javaScriptEnabled":true,"colorScheme":"dark","route":"/contact/index.html?via=integration"}
+passed {"width":390,"font":16,"javaScriptEnabled":true,"colorScheme":"dark","route":"/contact/index.html?via=integration"}
+start {"width":1280,"font":32,"javaScriptEnabled":false,"colorScheme":"light","route":"/contact/"}
+passed {"width":1280,"font":32,"javaScriptEnabled":false,"colorScheme":"light","route":"/contact/"}
+{
+  "mode": "preview",
+  "browser": "156.0.8078.4",
+  "composedScenarios": 4,
+  "discriminatingControls": 3,
+  "errors": 0
+}
+browser closed

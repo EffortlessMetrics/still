@@ -1,0 +1,33 @@
+
+> still-neutral-starter@0.2.0 build
+> astro build
+
+01:03:36 [types] Generated 90ms
+01:03:36 [build] output: "static"
+01:03:36 [build] mode: "static"
+01:03:36 [build] directory: /workspace/still-integration-audit/dist/
+01:03:36 [build] Collecting build info...
+01:03:36 [build] ✓ Completed in 132ms.
+01:03:36 [build] Building static entrypoints...
+01:03:36 [vite] ✓ built in 181ms
+01:03:36 [vite] ✓ built in 21ms
+01:03:36 [build] Rearranging server assets...
+
+ generating static routes 
+01:03:36   ├─ /404.html (+13ms) 
+01:03:36   ├─ /contact/index.html (+3ms) 
+01:03:36   ├─ /offline/index.html (+2ms) 
+01:03:36   ├─ /project-support/index.html (+2ms) 
+01:03:36   ├─ /robots.txt (+1ms) 
+01:03:36   ├─ /workshops/index.html (+2ms) 
+01:03:36   ├─ /index.html (+2ms) 
+01:03:36 ✓ Completed in 35ms.
+
+01:03:36 [build] ✓ Completed in 270ms.
+01:03:36 [build] 6 page(s) built in 465ms
+01:03:36 [build] Complete!
+npm notice
+npm notice New major version of npm available! 11.9.0 -> 12.2.0
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.0
+npm notice To update run: npm install -g npm@12.2.0
+npm notice

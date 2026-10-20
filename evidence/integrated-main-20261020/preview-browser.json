@@ -1,0 +1,588 @@
+{
+  "mode": "preview",
+  "candidate": "c1455ab4a7519e0e1ddd5b811c76ada6bf915f6c",
+  "tree": "fd6cb3b73e0f0fcba336dc45d8517de41cc953dd",
+  "browser": "156.0.8078.4",
+  "node": "v24.19.0",
+  "observations": [
+    {
+      "scenario": {
+        "width": 320,
+        "font": 32,
+        "javaScriptEnabled": true,
+        "colorScheme": "light",
+        "route": "/contact/"
+      },
+      "servedContactSHA256": "c6aa3571b049b3094234819c3e6ef19d85ed89c84ffbe20f8c73932208499390",
+      "initialSkip": {
+        "top": -169.1875,
+        "bottom": 0,
+        "height": 169.1875,
+        "outline": "none",
+        "outlineWidth": 3
+      },
+      "focusedSkip": {
+        "top": 8,
+        "bottom": 177.1875,
+        "height": 169.1875,
+        "outline": "solid",
+        "outlineWidth": 3
+      },
+      "contact": {
+        "viewport": 320,
+        "document": 320,
+        "bounds": [
+          {
+            "tag": "FORM",
+            "left": 25,
+            "right": 295,
+            "width": 270,
+            "client": 270,
+            "scroll": 270
+          },
+          {
+            "tag": "FIELDSET",
+            "left": 27,
+            "right": 293,
+            "width": 266,
+            "client": 264,
+            "scroll": 264
+          },
+          {
+            "tag": "LEGEND",
+            "left": 52,
+            "right": 268,
+            "width": 216,
+            "client": 216,
+            "scroll": 216
+          },
+          {
+            "tag": "LABEL",
+            "left": 52,
+            "right": 268,
+            "width": 216,
+            "client": 216,
+            "scroll": 216
+          },
+          {
+            "tag": "INPUT",
+            "left": 52,
+            "right": 268,
+            "width": 216,
+            "client": 214,
+            "scroll": 214
+          },
+          {
+            "tag": "LABEL",
+            "left": 52,
+            "right": 268,
+            "width": 216,
+            "client": 216,
+            "scroll": 216
+          },
+          {
+            "tag": "INPUT",
+            "left": 52,
+            "right": 268,
+            "width": 216,
+            "client": 214,
+            "scroll": 214
+          },
+          {
+            "tag": "LABEL",
+            "left": 52,
+            "right": 268,
+            "width": 216,
+            "client": 216,
+            "scroll": 216
+          },
+          {
+            "tag": "TEXTAREA",
+            "left": 52,
+            "right": 268,
+            "width": 216,
+            "client": 214,
+            "scroll": 214
+          },
+          {
+            "tag": "BUTTON",
+            "left": 52,
+            "right": 268,
+            "width": 216,
+            "client": 214,
+            "scroll": 214
+          }
+        ],
+        "disabled": true,
+        "noBackend": true,
+        "described": true
+      },
+      "keyboardJourney": "skip → main → return (disabled controls skipped) → home → nav Contact → contact; query/index/fragment current state preserved",
+      "requests": 33
+    },
+    {
+      "scenario": {
+        "width": 320,
+        "font": 32,
+        "javaScriptEnabled": false,
+        "colorScheme": "dark",
+        "route": "/contact/index.html?via=integration"
+      },
+      "servedContactSHA256": "c6aa3571b049b3094234819c3e6ef19d85ed89c84ffbe20f8c73932208499390",
+      "initialSkip": {
+        "top": -169.1875,
+        "bottom": 0,
+        "height": 169.1875,
+        "outline": "none",
+        "outlineWidth": 3
+      },
+      "focusedSkip": {
+        "top": 8,
+        "bottom": 177.1875,
+        "height": 169.1875,
+        "outline": "solid",
+        "outlineWidth": 3
+      },
+      "contact": {
+        "viewport": 320,
+        "document": 320,
+        "bounds": [
+          {
+            "tag": "FORM",
+            "left": 25,
+            "right": 295,
+            "width": 270,
+            "client": 270,
+            "scroll": 270
+          },
+          {
+            "tag": "FIELDSET",
+            "left": 27,
+            "right": 293,
+            "width": 266,
+            "client": 264,
+            "scroll": 264
+          },
+          {
+            "tag": "LEGEND",
+            "left": 52,
+            "right": 268,
+            "width": 216,
+            "client": 216,
+            "scroll": 216
+          },
+          {
+            "tag": "LABEL",
+            "left": 52,
+            "right": 268,
+            "width": 216,
+            "client": 216,
+            "scroll": 216
+          },
+          {
+            "tag": "INPUT",
+            "left": 52,
+            "right": 268,
+            "width": 216,
+            "client": 214,
+            "scroll": 214
+          },
+          {
+            "tag": "LABEL",
+            "left": 52,
+            "right": 268,
+            "width": 216,
+            "client": 216,
+            "scroll": 216
+          },
+          {
+            "tag": "INPUT",
+            "left": 52,
+            "right": 268,
+            "width": 216,
+            "client": 214,
+            "scroll": 214
+          },
+          {
+            "tag": "LABEL",
+            "left": 52,
+            "right": 268,
+            "width": 216,
+            "client": 216,
+            "scroll": 216
+          },
+          {
+            "tag": "TEXTAREA",
+            "left": 52,
+            "right": 268,
+            "width": 216,
+            "client": 214,
+            "scroll": 214
+          },
+          {
+            "tag": "BUTTON",
+            "left": 52,
+            "right": 268,
+            "width": 216,
+            "client": 214,
+            "scroll": 214
+          }
+        ],
+        "disabled": true,
+        "noBackend": true,
+        "described": true
+      },
+      "keyboardJourney": "skip → main → return (disabled controls skipped) → home → nav Contact → contact; query/index/fragment current state preserved",
+      "requests": 21
+    },
+    {
+      "scenario": {
+        "width": 390,
+        "font": 16,
+        "javaScriptEnabled": true,
+        "colorScheme": "dark",
+        "route": "/contact/index.html?via=integration"
+      },
+      "servedContactSHA256": "c6aa3571b049b3094234819c3e6ef19d85ed89c84ffbe20f8c73932208499390",
+      "initialSkip": {
+        "top": -60.296875,
+        "bottom": 0,
+        "height": 60.296875,
+        "outline": "none",
+        "outlineWidth": 3
+      },
+      "focusedSkip": {
+        "top": 8,
+        "bottom": 68.296875,
+        "height": 60.296875,
+        "outline": "solid",
+        "outlineWidth": 3
+      },
+      "contact": {
+        "viewport": 390,
+        "document": 390,
+        "bounds": [
+          {
+            "tag": "FORM",
+            "left": 25,
+            "right": 365,
+            "width": 340,
+            "client": 340,
+            "scroll": 340
+          },
+          {
+            "tag": "FIELDSET",
+            "left": 27,
+            "right": 363,
+            "width": 336,
+            "client": 334,
+            "scroll": 334
+          },
+          {
+            "tag": "LEGEND",
+            "left": 52,
+            "right": 338,
+            "width": 286,
+            "client": 286,
+            "scroll": 286
+          },
+          {
+            "tag": "LABEL",
+            "left": 52,
+            "right": 338,
+            "width": 286,
+            "client": 286,
+            "scroll": 286
+          },
+          {
+            "tag": "INPUT",
+            "left": 52,
+            "right": 338,
+            "width": 286,
+            "client": 284,
+            "scroll": 284
+          },
+          {
+            "tag": "LABEL",
+            "left": 52,
+            "right": 338,
+            "width": 286,
+            "client": 286,
+            "scroll": 286
+          },
+          {
+            "tag": "INPUT",
+            "left": 52,
+            "right": 338,
+            "width": 286,
+            "client": 284,
+            "scroll": 284
+          },
+          {
+            "tag": "LABEL",
+            "left": 52,
+            "right": 338,
+            "width": 286,
+            "client": 286,
+            "scroll": 286
+          },
+          {
+            "tag": "TEXTAREA",
+            "left": 52,
+            "right": 338,
+            "width": 286,
+            "client": 284,
+            "scroll": 284
+          },
+          {
+            "tag": "BUTTON",
+            "left": 52,
+            "right": 338,
+            "width": 286,
+            "client": 284,
+            "scroll": 284
+          }
+        ],
+        "disabled": true,
+        "noBackend": true,
+        "described": true
+      },
+      "keyboardJourney": "skip → main → return (disabled controls skipped) → home → nav Contact → contact; query/index/fragment current state preserved",
+      "requests": 33
+    },
+    {
+      "scenario": {
+        "width": 1280,
+        "font": 32,
+        "javaScriptEnabled": false,
+        "colorScheme": "light",
+        "route": "/contact/"
+      },
+      "servedContactSHA256": "c6aa3571b049b3094234819c3e6ef19d85ed89c84ffbe20f8c73932208499390",
+      "initialSkip": {
+        "top": -96.59375,
+        "bottom": 0,
+        "height": 96.59375,
+        "outline": "none",
+        "outlineWidth": 3
+      },
+      "focusedSkip": {
+        "top": 8,
+        "bottom": 104.59375,
+        "height": 96.59375,
+        "outline": "solid",
+        "outlineWidth": 3
+      },
+      "contact": {
+        "viewport": 1280,
+        "document": 1280,
+        "bounds": [
+          {
+            "tag": "FORM",
+            "left": 84,
+            "right": 764,
+            "width": 680,
+            "client": 680,
+            "scroll": 680
+          },
+          {
+            "tag": "FIELDSET",
+            "left": 86,
+            "right": 762,
+            "width": 676,
+            "client": 674,
+            "scroll": 674
+          },
+          {
+            "tag": "LEGEND",
+            "left": 111,
+            "right": 737,
+            "width": 626,
+            "client": 626,
+            "scroll": 626
+          },
+          {
+            "tag": "LABEL",
+            "left": 111,
+            "right": 737,
+            "width": 626,
+            "client": 626,
+            "scroll": 626
+          },
+          {
+            "tag": "INPUT",
+            "left": 111,
+            "right": 737,
+            "width": 626,
+            "client": 624,
+            "scroll": 624
+          },
+          {
+            "tag": "LABEL",
+            "left": 111,
+            "right": 737,
+            "width": 626,
+            "client": 626,
+            "scroll": 626
+          },
+          {
+            "tag": "INPUT",
+            "left": 111,
+            "right": 737,
+            "width": 626,
+            "client": 624,
+            "scroll": 624
+          },
+          {
+            "tag": "LABEL",
+            "left": 111,
+            "right": 737,
+            "width": 626,
+            "client": 626,
+            "scroll": 626
+          },
+          {
+            "tag": "TEXTAREA",
+            "left": 111,
+            "right": 737,
+            "width": 626,
+            "client": 624,
+            "scroll": 624
+          },
+          {
+            "tag": "BUTTON",
+            "left": 111,
+            "right": 737,
+            "width": 626,
+            "client": 624,
+            "scroll": 624
+          }
+        ],
+        "disabled": true,
+        "noBackend": true,
+        "described": true
+      },
+      "keyboardJourney": "skip → main → return (disabled controls skipped) → home → nav Contact → contact; query/index/fragment current state preserved",
+      "requests": 21
+    }
+  ],
+  "controls": [
+    {
+      "name": "pre-PR25 skip offset",
+      "failedAsExpected": true,
+      "assertion": "Unfocused skip link entirely hidden"
+    },
+    {
+      "name": "pre-PR22 contact wrapping",
+      "failedAsExpected": true,
+      "assertion": "Document fits viewport"
+    },
+    {
+      "name": "pre-PR24 absent current state",
+      "failedAsExpected": true,
+      "assertion": "Expected values to be strictly deep-equal:\n+ actual - expected\n\n+ []\n- [\n-   {\n-     href: '/contact/',\n-     state: 'page'\n-   }\n- ]\n"
+    },
+    {
+      "name": "baseline measurements",
+      "oldSkip": {
+        "top": -100,
+        "bottom": 69.1875,
+        "height": 169.1875,
+        "outline": "none",
+        "outlineWidth": 3
+      },
+      "oldContact": {
+        "viewport": 320,
+        "document": 325,
+        "bounds": [
+          {
+            "tag": "FORM",
+            "left": 25,
+            "right": 295,
+            "width": 270,
+            "client": 270,
+            "scroll": 300
+          },
+          {
+            "tag": "FIELDSET",
+            "left": 27,
+            "right": 324.984375,
+            "width": 297.984375,
+            "client": 296,
+            "scroll": 296
+          },
+          {
+            "tag": "LEGEND",
+            "left": 52,
+            "right": 299.984375,
+            "width": 247.984375,
+            "client": 248,
+            "scroll": 248
+          },
+          {
+            "tag": "LABEL",
+            "left": 52,
+            "right": 299.984375,
+            "width": 247.984375,
+            "client": 248,
+            "scroll": 248
+          },
+          {
+            "tag": "INPUT",
+            "left": 52,
+            "right": 299.984375,
+            "width": 247.984375,
+            "client": 246,
+            "scroll": 246
+          },
+          {
+            "tag": "LABEL",
+            "left": 52,
+            "right": 299.984375,
+            "width": 247.984375,
+            "client": 248,
+            "scroll": 248
+          },
+          {
+            "tag": "INPUT",
+            "left": 52,
+            "right": 299.984375,
+            "width": 247.984375,
+            "client": 246,
+            "scroll": 246
+          },
+          {
+            "tag": "LABEL",
+            "left": 52,
+            "right": 299.984375,
+            "width": 247.984375,
+            "client": 248,
+            "scroll": 248
+          },
+          {
+            "tag": "TEXTAREA",
+            "left": 52,
+            "right": 299.984375,
+            "width": 247.984375,
+            "client": 246,
+            "scroll": 246
+          },
+          {
+            "tag": "BUTTON",
+            "left": 52,
+            "right": 299.984375,
+            "width": 247.984375,
+            "client": 246,
+            "scroll": 246
+          }
+        ],
+        "disabled": true,
+        "noBackend": true,
+        "described": true
+      }
+    }
+  ],
+  "browserErrors": [],
+  "blockedRequests": [],
+  "finishedUTC": "2026-10-20T01:07:31.373Z"
+}

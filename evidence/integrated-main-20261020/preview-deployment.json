@@ -1,0 +1,154 @@
+{
+  "candidate": "c1455ab4a7519e0e1ddd5b811c76ada6bf915f6c",
+  "tree": "fd6cb3b73e0f0fcba336dc45d8517de41cc953dd",
+  "mode": "preview",
+  "node": "v24.19.0",
+  "commands": [
+    {
+      "label": "effective root/output pass",
+      "args": [
+        "scripts/verify-starter.mjs"
+      ],
+      "status": 0,
+      "stdout": "Starter output passes: 7 HTML files, preview indexing, configured identity/links/sitemap, marked contact examples, offline page digests/fallback/fonts and notices.\n",
+      "stderr": ""
+    },
+    {
+      "label": "retained root output rejects non-root config",
+      "args": [
+        "scripts/verify-starter.mjs"
+      ],
+      "status": 1,
+      "stdout": "",
+      "stderr": "01:07:39 [ERROR] [still-starter-sitemap] An unhandled error occurred while running the \"astro:config:done\" hook\nfile:///tmp/still-composed-deployment-7bMKgt/scripts/site-output.mjs:7\n  if (base !== '/') throw new Error(\n                          ^\n\nError: Still starter requires Astro base \"/\"; non-root base \"/docs/\" is unsupported. Links, metadata, assets and the pinned offline corpus require coordinated base-path support.\n    at assertRootBase (file:///tmp/still-composed-deployment-7bMKgt/scripts/site-output.mjs:7:27)\n    at astro:config:done (file:///tmp/still-composed-deployment-7bMKgt/scripts/site-output.mjs:52:44)\n    at hookFn (file:///workspace/still-integration-audit/node_modules/astro/dist/integrations/hooks.js:56:21)\n    at withTakingALongTimeMsg (file:///workspace/still-integration-audit/node_modules/astro/dist/integrations/hooks.js:34:18)\n    at runHookInternal (file:///workspace/still-integration-audit/node_modules/astro/dist/integrations/hooks.js:53:11)\n    at runHookConfigDone (file:///workspace/still-integration-audit/node_modules/astro/dist/integrations/hooks.js:284:11)\n    at file:///workspace/still-integration-audit/node_modules/astro/dist/config/index.js:40:11\n    at async verificationConfig (file:///tmp/still-composed-deployment-7bMKgt/scripts/verify-starter.mjs:228:3)\n    at async file:///tmp/still-composed-deployment-7bMKgt/scripts/verify-starter.mjs:237:18\n\nNode.js v24.19.0\n"
+    },
+    {
+      "label": "build rejects non-root before touching output",
+      "args": [
+        "/workspace/still-integration-audit/node_modules/astro/bin/astro.mjs",
+        "build"
+      ],
+      "status": 1,
+      "stdout": "",
+      "stderr": "01:07:40 [ERROR] [still-starter-sitemap] An unhandled error occurred while running the \"astro:config:done\" hook\nStill starter requires Astro base \"/\"; non-root base \"/docs/\" is unsupported. Links, metadata, assets and the pinned offline corpus require coordinated base-path support.\n  Location:\n    /workspace/still-integration-audit/node_modules/astro/dist/integrations/hooks.js:56:21\n  Stack trace:\n    at assertRootBase (file:///tmp/still-composed-deployment-7bMKgt/scripts/site-output.mjs:7:27)\n    at hookFn (file:///workspace/still-integration-audit/node_modules/astro/dist/integrations/hooks.js:56:21)\n    at runHookInternal (file:///workspace/still-integration-audit/node_modules/astro/dist/integrations/hooks.js:53:11)\n    at AstroBuilder.setup (file:///workspace/still-integration-audit/node_modules/astro/dist/core/build/index.js:87:11)\n    at async build (file:///workspace/still-integration-audit/node_modules/astro/dist/core/build/index.js:50:3)\n"
+    },
+    {
+      "label": "effective integration root/output override passes",
+      "args": [
+        "scripts/verify-starter.mjs"
+      ],
+      "status": 0,
+      "stdout": "Starter output passes: 7 HTML files, preview indexing, configured identity/links/sitemap, marked contact examples, offline page digests/fallback/fonts and notices.\n",
+      "stderr": ""
+    },
+    {
+      "label": "stale default dist cannot substitute for configured missing output",
+      "args": [
+        "scripts/verify-starter.mjs"
+      ],
+      "status": 1,
+      "stdout": "",
+      "stderr": "node:internal/fs/promises:933\n      await PromisePrototypeThen(\n      ^\n\nError: ENOENT: no such file or directory, scandir '/tmp/still-composed-deployment-7bMKgt/missing/'\n    at async readdirRecursive (node:internal/fs/promises:933:7)\n    at async htmlPages (file:///tmp/still-composed-deployment-7bMKgt/scripts/site-output.mjs:17:18)\n    at async verifyStarter (file:///tmp/still-composed-deployment-7bMKgt/scripts/verify-starter.mjs:108:17)\n    at async file:///tmp/still-composed-deployment-7bMKgt/scripts/verify-starter.mjs:240:17 {\n  errno: -2,\n  code: 'ENOENT',\n  syscall: 'scandir',\n  path: '/tmp/still-composed-deployment-7bMKgt/missing/'\n}\n\nNode.js v24.19.0\n"
+    }
+  ],
+  "checks": [
+    "Root output passes; omitted/undefined/null and non-root direct API bases reject",
+    "CLI respects effective build-only owner setup once, root base and outDir; retained dist cannot hide missing effective output",
+    "Discriminating old-base control certifies omitted effective base; current code rejects the identical call",
+    "Mutated composed contact output rejected: missing active navigation",
+    "Mutated composed contact output rejected: false active navigation",
+    "Mutated composed contact output rejected: enabled retained demo control",
+    "All generated bytes unchanged after verification and rejected configuration/build probes"
+  ],
+  "buildOutput": [
+    [
+      "404.html",
+      "775da7759c638690f74b45b2704c404ebf5eda210b42aa9a5362e8aa3ec4cc4f"
+    ],
+    [
+      "404/index.html",
+      "775da7759c638690f74b45b2704c404ebf5eda210b42aa9a5362e8aa3ec4cc4f"
+    ],
+    [
+      "_astro/Site.C_oVvsY-.css",
+      "8a860fcc0e7f1e67dfcff7a6d15b74525b7eaa906a64ac1aa863d8be1b8c90d6"
+    ],
+    [
+      "_astro/Site.astro_astro_type_script_index_0_lang.BZguvuFz.js",
+      "313a59af0994a00d6073f3601e20d0f116215a5e0b102c269e7f0dd492e4497d"
+    ],
+    [
+      "_astro/page.xZM82z1n.js",
+      "7b4b65c2407349a699786232ea961bc4415b7b8347d137cfa25196b4d4bdd407"
+    ],
+    [
+      "_astro/prefetch.B63FRf4-.js",
+      "bfe47019f54e66734113fbf8bc4e49437fddcf8830633046fa418d9e67758565"
+    ],
+    [
+      "_headers",
+      "fc47e3b1ac1dd9fae5a74ebad2769e2fad150ed1c4d47446274f345735a1c4f7"
+    ],
+    [
+      "contact/index.html",
+      "c6aa3571b049b3094234819c3e6ef19d85ed89c84ffbe20f8c73932208499390"
+    ],
+    [
+      "favicon.svg",
+      "0ef4f221efa35f975c47b0f03ec67b7335f2f26c187199d265dcb9b6ec887ab4"
+    ],
+    [
+      "fonts/IBMPlexMono-Regular.ttf",
+      "6a3412f058c7d8dfd9170c41e85ade48e5156ecb89356110ca57a0a27734af46"
+    ],
+    [
+      "fonts/IBMPlexSans.ttf",
+      "3b031aa4216174205bd8471f88a49b91f093169e9e87bd5262242bc5967fe2e3"
+    ],
+    [
+      "fonts/OFL-Mono.txt",
+      "7e6b2818edbd8f6a01ae80641cc8f16a51080d08fb4e532be3a0b6f74adb07da"
+    ],
+    [
+      "fonts/OFL-Sans.txt",
+      "7e6b2818edbd8f6a01ae80641cc8f16a51080d08fb4e532be3a0b6f74adb07da"
+    ],
+    [
+      "fonts/PROVENANCE.md",
+      "7ea9dd45f85f3ff5571007f452009dd9065333727cbd865a1394bc4cbd25ee28"
+    ],
+    [
+      "index.html",
+      "5abe0df46e87e4e134d7b89214bdfc5f50942989f519a0bceb5e1575d0713fd1"
+    ],
+    [
+      "offline-receipt.json",
+      "8b6dd5a227eb7a328114fe36894e18144f63242bd798f9da10a071d3a6e59d0e"
+    ],
+    [
+      "offline/index.html",
+      "e610b3c042ee33647f0e4cb6d5cda85e719b013d90162be3ef688dec0ace173f"
+    ],
+    [
+      "project-support/index.html",
+      "11c30b0cdf6fed5a2b67dd70f2ec3ee53c5e12aacdc8e18939abf6eff4c47fda"
+    ],
+    [
+      "reading-worker.js",
+      "dad23df60e1666090a84c6dacb92fd2baea1264af7a70bfc95ac7d1e3505f1ab"
+    ],
+    [
+      "robots.txt",
+      "331ea9090db0c9f6f597bd9840fd5b171830f6e0b3ba1cb24dfa91f0c95aedc1"
+    ],
+    [
+      "sitemap.xml",
+      "a28ad81306eadc8c42fb99e80720e7b482f6ba12092d7c7db2ca403926b7f54f"
+    ],
+    [
+      "workshops/index.html",
+      "63386947a78d9a020499b1651a9d65e944852fb078419b2229c6418932501a84"
+    ]
+  ],
+  "finishedUTC": "2026-10-20T01:07:42.198Z"
+}

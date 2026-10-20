@@ -1,0 +1,19 @@
+
+> still-neutral-starter@0.2.0 test:upgrade
+> node --test scripts/verify-upgrade.test.mjs
+
+✔ starter tooling migration preserves owner source and hashes the final sitemap (29798.16716ms)
+ℹ before install: fixture/cache 1372984 bytes; filesystem available 9422737408 bytes
+ℹ Missing helper and historical adapter fail independently; scoped adapter/style migration preserves owner content and theme IDs
+ℹ Still 0.2.1 to 0.2.2 archive update: frozen install/license/build pass; legacy sitemap still rejects missing owner route
+ℹ Migrated config/adapter: check/build/verification pass; only reviewed library records, configs, helper, bounded adapter/style edits and retired sitemap source change
+ℹ Reversed order: final sitemap is absent from worker corpus
+ℹ after controls: fixture/cache 412804715 bytes; filesystem available 8923639808 bytes
+ℹ tests 1
+ℹ suites 0
+ℹ pass 1
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 29868.499884

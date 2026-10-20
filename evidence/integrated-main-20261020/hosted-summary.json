@@ -1,0 +1,141 @@
+{
+  "observedUTC": "2026-10-20T01:09:27.363Z",
+  "run": {
+    "id": 39344654804,
+    "event": "push",
+    "head_sha": "c1455ab4a7519e0e1ddd5b811c76ada6bf915f6c",
+    "status": "completed",
+    "conclusion": "success",
+    "run_started_at": "2026-10-19T23:56:44Z",
+    "updated_at": "2026-10-19T23:59:53Z",
+    "html_url": "https://github.com/EffortlessMetrics/still/actions/runs/39344654804"
+  },
+  "jobs": [
+    {
+      "id": 118374235703,
+      "name": "starter (preview)",
+      "status": "completed",
+      "conclusion": "success",
+      "steps": [
+        {
+          "name": "Set up job",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run npm ci --ignore-scripts",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run npm run check",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run npm run build",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run npm run verify:starter",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run node scripts/verify-licenses.mjs",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run npm run test:licenses",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run npm run test:starter",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "id": 118374235980,
+      "name": "starter (production)",
+      "status": "completed",
+      "conclusion": "success",
+      "steps": [
+        {
+          "name": "Set up job",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run npm ci --ignore-scripts",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run npm run check",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run npm run build",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run npm run verify:starter",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run node scripts/verify-licenses.mjs",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run npm run test:licenses",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run npm run test:starter",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "conclusion": "success"
+        }
+      ]
+    }
+  ],
+  "logDownload": {
+    "action": "gh api repos/EffortlessMetrics/still/actions/jobs/118374235703/logs",
+    "outcome": "DENIED: signed Azure blob redirect returned Forbidden; no job log obtained; not retried",
+    "productionLog": "Not attempted after preview log denial"
+  },
+  "carriedFromPR19": "83/83 starter tests and 8/8 license tests per mode; stated in PR19 integration record. Current run/job metadata independently confirms every step succeeded, but this audit could not decode logs to recount tests."
+}
