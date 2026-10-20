@@ -311,8 +311,10 @@ test('isolated owner content, sitemap, output directory and negative controls', 
     ]) {
       await t.test(`${label} metadata remains valid beside comments and raw-text comment markers`, async () => {
         const dir = join(root, 'valid-metadata'); await cp(directory, dir, {recursive:true});
-        await changeHtml(dir, (html) => html.replace(pattern, (tag) =>
-          `<!--${tag.replace(site.origin, 'https://wrong.example.invalid')}--><!--><!---><!-- preceding comment --!><script type="application/json">"<!--"</script>${tag}<script type="application/json">"-->"</script>`));
+        await changeHtml(dir, (html) => html.replace(pattern, (tag) => {
+          const wrong = tag.replace(site.origin, 'https://wrong.example.invalid');
+          return `<!--${wrong}--><template><template></template>${wrong}</template><template/>${wrong}</template><!--><!---><!-- preceding comment --!><script type="application/json">"<!--"</script>${tag}<script type="application/json">"-->"</script>`;
+        }));
         await refreshOffline(dir);
         assert.equal(await verifyStarter({...options, directory:dir}), 10);
         await rm(dir, {recursive:true});
@@ -322,6 +324,9 @@ test('isolated owner content, sitemap, output directory and negative controls', 
         ['script text', (tag) => `<script type="text/plain">${tag}</script>`],
         ['style text', (tag) => `<style>/*${tag}*/</style>`],
         ['quoted attribute value', (tag) => `<meta name="example" content='${tag}'>`],
+        ['template', (tag) => `<template>${tag}</template>`],
+        ['nested template', (tag) => `<template><template></template>${tag}</template>`],
+        ['self-closing template', (tag) => `<template/>${tag}</template>`],
       ]) {
         await t.test(`rejects wrong ${label} metadata masked by a ${context}`, async () => {
           const dir = join(root, 'masked-metadata'); await cp(directory, dir, {recursive:true});
