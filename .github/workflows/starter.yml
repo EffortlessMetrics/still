@@ -22,6 +22,31 @@ jobs:
       - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38
         with:
           node-version: '24.19.0'
+      - name: Record qualification identity
+        run: |
+          node --input-type=module <<'NODE'
+          import { readFileSync, appendFileSync } from 'node:fs';
+          import { execFileSync } from 'node:child_process';
+          const git = (...args) => execFileSync('git', args, { encoding: 'utf8' }).trim();
+          const event = JSON.parse(readFileSync(process.env.GITHUB_EVENT_PATH, 'utf8'));
+          const identity = {
+            checkout: { commit: git('rev-parse', 'HEAD'), tree: git('rev-parse', 'HEAD^{tree}') },
+            event: { name: process.env.GITHUB_EVENT_NAME, sha: process.env.GITHUB_SHA },
+            pullRequest: event.pull_request ? {
+              head: event.pull_request.head.sha,
+              base: event.pull_request.base.sha
+            } : null,
+            run: { id: process.env.GITHUB_RUN_ID, attempt: process.env.GITHUB_RUN_ATTEMPT },
+            siteEnvironment: process.env.PUBLIC_SITE_ENV,
+            runtime: {
+              node: process.version,
+              npm: execFileSync('npm', ['--version'], { encoding: 'utf8' }).trim()
+            }
+          };
+          const evidence = JSON.stringify(identity, null, 2);
+          console.log(evidence);
+          appendFileSync(process.env.GITHUB_STEP_SUMMARY, `### Qualification identity\n\n\`\`\`json\n${evidence}\n\`\`\`\n`);
+          NODE
       - run: npm ci --ignore-scripts
       - run: npm run check
       - run: npm run build
