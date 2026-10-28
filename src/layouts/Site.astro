@@ -4,10 +4,12 @@ import Header from '@effortlessmetrics/still/header';
 import Footer from '@effortlessmetrics/still/footer';
 import {site} from '../../site.config.mjs';
 import {isCurrentPage} from '../navigation.mjs';
+import {validatePageMetadata} from '../page-metadata.mjs';
 import '@effortlessmetrics/still/styles.css';
 import '../styles/starter.css';
 interface Props {title:string;description:string;canonicalPath?:string;}
 const {title,description,canonicalPath='/'}=Astro.props;
+validatePageMetadata({title,description});
 const origin=Astro.site?.origin ?? site.origin;
 ---
 <Layout title={title+' | '+site.name} description={description} origin={origin} canonicalPath={canonicalPath} production={import.meta.env.PUBLIC_SITE_ENV==='production'} themeStorageKey={site.themeStorageKey} themeButtonId="site-theme-toggle">

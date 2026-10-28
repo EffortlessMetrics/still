@@ -173,7 +173,7 @@ test('isolated owner content, sitemap, output directory and negative controls', 
   const root = await mkdtemp(join(tmpdir(), 'still-first-use-'));
   try {
     // Content fixtures are independent of the consumer's editable sample pages.
-    for (const file of ['package.json', 'package-lock.json', 'licenses', 'public', 'scripts', 'tsconfig.json', 'src/layouts', 'src/styles', 'src/navigation.mjs'])
+    for (const file of ['package.json', 'package-lock.json', 'licenses', 'public', 'scripts', 'tsconfig.json', 'src/layouts', 'src/styles', 'src/navigation.mjs', 'src/page-metadata.mjs'])
       await cp(join(source, file), join(root, file), { recursive: true });
     const application = JSON.parse(await readFile(join(root, 'package.json')));
     const bundled = Object.values(application.dependencies).filter((pin) => pin.startsWith('file:'));

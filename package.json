@@ -13,7 +13,7 @@
     "verify:licenses": "node scripts/verify-licenses.mjs",
     "test:licenses": "node --test scripts/verify-licenses.test.mjs",
     "test:upgrade": "node --test scripts/verify-upgrade.test.mjs",
-    "test:starter": "node --test --test-concurrency=1 scripts/verify-starter.test.mjs scripts/offline-routes.test.mjs"
+    "test:starter": "node --test --test-concurrency=1 scripts/page-metadata.test.mjs scripts/verify-starter.test.mjs scripts/offline-routes.test.mjs"
   },
   "dependencies": {
     "@effortlessmetrics/still": "file:vendor/effortlessmetrics-still-0.2.2.tgz",
